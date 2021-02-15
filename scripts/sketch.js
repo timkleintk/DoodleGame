@@ -1,13 +1,18 @@
 const aspectRatio = 16 / 9;
 
 // ui
-let currentHover;
+let currentHover = null;
 
 let playSpriteStrip;
 let playSprite;
 let playButton;
 
+// animation stuff
 let frame = 0;
+let frameIndex = 0;
+const numFrames = 4;
+let newAnimationFrame = true;
+const animationSpeed = 25;
 
 // scale is based on 1200x675
 let scale = 1;
@@ -34,9 +39,21 @@ function setup() {
 // tick ------------------------------------------------------------
 function draw() {
     background(0);
+
+    // animation stuff ---------------------------------------------
     frame++;
-    
+    newAnimationFrame = (frame % animationSpeed === 0);
+    if (newAnimationFrame) { frameIndex = (frameIndex + 1) % numFrames }
+
+    // ui stuff ----------------------------------------------------
+    // mouse
+    if (newAnimationFrame) { updateCursor(); }
+
+
+    // draw game objects -------------------------------------------
     playButton.show();
+
+
 
 
 
@@ -95,17 +112,29 @@ function Button(sprite, bColor, posX, posY, width, height, onclick) {
 
         // determine hover
         if (mouseX / scale > this.tempX && mouseX / scale < this.tempX + this.tempWidth && mouseY / scale > this.tempY && mouseY / scale < this.tempY + this.tempHeight) {
-            this.tempX = this.posX - this.delta;
-            this.tempY = this.posY - this.delta;
-            this.tempWidth = this.width + 2 * this.delta;
-            this.tempHeight = this.height + 2 * this.delta;
-            cursor(getHandMousePath());
+            // hover
+            if (this !== currentHover) {
+                // enter hover
+                currentHover = this;
+                updateCursor();
+
+                this.tempX = this.posX - this.delta;
+                this.tempY = this.posY - this.delta;
+                this.tempWidth = this.width + 2 * this.delta;
+                this.tempHeight = this.height + 2 * this.delta;
+            }
         } else {
-            this.tempX = this.posX;
-            this.tempY = this.posY;
-            this.tempWidth = this.width;
-            this.tempHeight = this.height;
-            cursor(getMousePath());
+            // no hover
+            if (this === currentHover) {
+                // exit hover
+                currentHover = null;
+                updateCursor();
+                
+                this.tempX = this.posX;
+                this.tempY = this.posY;
+                this.tempWidth = this.width;
+                this.tempHeight = this.height;
+            }
         }
 
         // draw box
@@ -123,12 +152,12 @@ function Button(sprite, bColor, posX, posY, width, height, onclick) {
 
 // utility functions -----------------------------------------------
 
-function getMousePath() {
-    let index = floor(frame / 25) % 4;
-    return "assets/mouse" + index + ".png";
+function updateCursor() {
+    if (currentHover === null) {
+        // no hover
+        cursor("assets/mouse" + frameIndex + ".png");
+    } else {
+        cursor("assets/hand" + frameIndex + ".png")
+    }
 }
 
-function getHandMousePath() {
-    let index = floor(frame / 25) % 4;
-    return "assets/hand" + index + ".png";
-}
