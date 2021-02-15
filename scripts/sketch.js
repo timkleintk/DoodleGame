@@ -8,11 +8,15 @@ let teal;
 let uiElements = [];
 let currentHover = null;
 
+
 // images
 let playSpriteStrip;
 let pauseSpriteStrip;
 let crossSpriteStrip;
 let cursorSpriteStrip;
+const numLetters = 20;
+let letters = [];
+
 
 // animation stuff
 let frame = 0;
@@ -66,6 +70,11 @@ function preload() {
     pauseSpriteStrip = loadImage('assets/pause.png');
     crossSpriteStrip = loadImage('assets/cross.png');
     cursorSpriteStrip = loadImage('assets/cursor.png');
+
+
+    for(let i = 0; i < numLetters; i++) {
+        letters.push(loadImage('assets/weirdSymbols/' + i + '.ss.png'));
+    }
 }
 
 function setup() {
@@ -95,6 +104,11 @@ function draw() {
     // ui
     uiElements.forEach((e) => { e.update(); e.show(); });
 
+    for (let i = 0; i < numLetters; i++) {
+        drawFrame(letters[i], 10 + 16*i, 200, 16, 24);
+    }
+
+
     // decide what to do based on the state
     switch (state.state) {
         case 'none':
@@ -121,10 +135,7 @@ function draw() {
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 
 // handeling boring stuff ------------------------------------------
-function windowResized() {
-
-    sizeCanvas();
-}
+function windowResized() { sizeCanvas(); }
 
 function sizeCanvas() {
     let canvasHolder = document.getElementById('canvasholder');
@@ -145,11 +156,25 @@ function Sprite(strip, posX, posY, width, height) {
     this.width = width;
     this.height = height;
 
-    this.show = function () {
-        image(this.strip, this.posX * scale, this.posY * scale, this.width * scale, this.height * scale, this.width * frameIndex, 0, this.width, this.height);
-    }
+    this.show = function () { drawFrame(this.strip, this.posX, this.posY, this.width, this.height); }
 }
 
+function drawFrame(strip, posX, posY, width, height) {
+    image(strip, posX * scale, posY * scale, width * scale, height * scale, width * frameIndex, 0, width, height);
+}
+
+function drawString(string, posX, posY) {
+    let x = posX;
+    let y = posY;
+
+    for (let i = 0; i < string.length; i++) {
+        let encoding = defaultFont[string[i]];
+        for (let j = 0; j < encoding.length; j++) {
+            drawFrame(segments[encoding[j]], x, y, 64, 128);
+        }
+        x += 64;
+    }
+}
 
 // -----------------------------------------------------------------
 // ui stuff 
