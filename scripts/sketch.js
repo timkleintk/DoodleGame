@@ -82,28 +82,33 @@ function Sprite(strip, numFrames, speed, posX, posY, width, height) {
     this.strip = strip;
     this.numFrames = numFrames;
     this.speed = speed;
-
+    
     this.posX = posX;
     this.posY = posY;
-
+    
     this.width = width;
     this.height = height;
-
+    
     this.show = function () {
         let index = floor(frame / speed) % numFrames;
         image(this.strip, this.posX * scale, this.posY * scale, this.width * scale, this.height * scale, this.width * index, 0, this.width, this.height);
     }
 }
 
+
+// -----------------------------------------------------------------
+// ui stuff 
+// -----------------------------------------------------------------
+
 // Button class ----------------------------------------------------
-function Button(sprite, bColor, posX, posY, width, height, onclick) {
+function Button(sprite, bColor, posX, posY, width, height, onClick) {
     this.sprite = sprite;
     this.bColor = bColor;
     this.posX = posX;
     this.posY = posY;
     this.width = width;
     this.height = height;
-    this.onclick = onclick;
+    this.onClick = onClick;
 
     this.delta = 10;
     this.tempX = this.posX;
@@ -150,20 +155,20 @@ function Button(sprite, bColor, posX, posY, width, height, onclick) {
         // draw sprite
         sprite.show();
 
-    }
-
+    };
 
 }
 
-
-// utility functions -----------------------------------------------
+function mouseClicked() {
+    if (currentHover !== null) {
+        currentHover.onClick();
+    }
+}
 
 function updateCursor() {
     if (currentHover === null) {
-        // no hover
         cursor("assets/mouse" + frameIndex + ".png");
     } else {
         cursor("assets/hand" + frameIndex + ".png")
     }
 }
-
