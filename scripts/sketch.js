@@ -163,7 +163,7 @@ function Button(sprite, bColor, posX, posY, width, height, onClick) {
 function mouseClicked() { if (currentHover !== null) { currentHover.onClick(); } }
 
 function drawCursor() {
-    if (mouseX >= 0 && mouseY >= 0) {
+    if (mouseX >= -1 && mouseY >= -1) {
         image(cursorSpriteStrip, clamp(mouseX, 0, width), clamp(mouseY, 0, height), 32 * scale, 32 * scale, ((currentHover ? 4 : 0) + frameIndex) * 32, 0, 32, 32);
     }
 }
