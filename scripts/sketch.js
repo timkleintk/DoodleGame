@@ -43,8 +43,6 @@ function setup() {
 function draw() {
     background(0);
 
-    console.log("x: " + mouseX + ", y: " + mouseY);
-
     // animation stuff ---------------------------------------------
     frame++;
     newAnimationFrame = (frame % animationSpeed === 0);
