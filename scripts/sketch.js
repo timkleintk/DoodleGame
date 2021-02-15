@@ -17,7 +17,7 @@ let scale = 1;
 // init ------------------------------------------------------------
 function preload() {
 
-    playSpriteStrip = loadImage('../assets/play.png');
+    playSpriteStrip = loadImage('assets/play.png');
 }
 
 function setup() {
@@ -99,7 +99,7 @@ function Button(sprite, bColor, posX, posY, width, height, onclick) {
             this.tempY = this.posY - this.delta;
             this.tempWidth = this.width + 2 * this.delta;
             this.tempHeight = this.height + 2 * this.delta;
-            cuSrsor(getHandMousePath());
+            cursor(getHandMousePath());
         } else {
             this.tempX = this.posX;
             this.tempY = this.posY;
@@ -125,10 +125,10 @@ function Button(sprite, bColor, posX, posY, width, height, onclick) {
 
 function getMousePath() {
     let index = floor(frame / 25) % 4;
-    return "../assets/mouse" + index + ".png";
+    return "assets/mouse" + index + ".png";
 }
 
 function getHandMousePath() {
     let index = floor(frame / 25) % 4;
-    return "../assets/hand" + index + ".png";
+    return "assets/hand" + index + ".png";
 }
