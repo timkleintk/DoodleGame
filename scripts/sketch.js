@@ -1,64 +1,116 @@
+
 const aspectRatio = 16 / 9;
 
+// colors
+let teal;
+
 // ui
+let uiElements = [];
 let currentHover = null;
 
+// images
 let playSpriteStrip;
-let playButton;
-
+let pauseSpriteStrip;
+let crossSpriteStrip;
 let cursorSpriteStrip;
-
 
 // animation stuff
 let frame = 0;
 let frameIndex = 0;
 const numFrames = 4;
-let newAnimationFrame = true;
 const animationSpeed = 25;
 
 // scale is based on 1200x675
 let scale = 1;
 
+// state machine functions -----------------------------------------
+let state = new StateMachine({
+    transitions: [
+        { name: 'init', from: 'none', to: 'mainMenu' },
+        { name: 'startNewGame', from: 'mainMenu', to: 'gaming' },
+        { name: 'pauseGame', from: 'gaming', to: 'paused' },
+        { name: 'exitToMainMenu', from: 'paused', to: 'mainMenu' },
+        { name: 'resumeGame', from: 'paused', to: 'gaming' },
+    ],
+    methods: {
+        onInit:             () => { loadMainMenuUI(); },
+        onStartNewGame:     () => { loadGameUI(); },
+        onPauseGame:        () => { loadPauseUI(); },
+        onExitToMainMenu:   () => { loadMainMenuUI(); },
+        onResumeGame:       () => { loadGameUI(); },
+    }
+})
+
+function loadMainMenuUI() {
+    uiElements = [];
+    uiElements.push(QuickButton(playSpriteStrip, 100, 100, () => { state.startNewGame(); }));
+}
+
+function loadGameUI() {
+    uiElements = [];
+    uiElements.push(QuickButton(pauseSpriteStrip, 100, 100, () => { state.pauseGame(); }))
+}
+
+function loadPauseUI() {
+    uiElements = [];
+    uiElements.push(QuickButton(playSpriteStrip, 100, 100, () => { state.resumeGame(); }));
+    uiElements.push(QuickButton(crossSpriteStrip, 220, 100, () => { state.exitToMainMenu(); }))
+
+}
 
 
 // init ------------------------------------------------------------
-function preload() {
 
+function preload() {
     playSpriteStrip = loadImage('assets/play.png');
+    pauseSpriteStrip = loadImage('assets/pause.png');
+    crossSpriteStrip = loadImage('assets/cross.png');
     cursorSpriteStrip = loadImage('assets/cursor.png');
 }
 
 function setup() {
-
     // canvas
     createCanvas(100, 100).parent('canvasholder').mouseOut(() => { cursor(); }).mouseOver(() => { noCursor(); });
     sizeCanvas();
 
+    // colors
+    teal = color('teal');
+
     // ui
     noCursor();
-    playButton = new Button(new Sprite(playSpriteStrip, 100, 100, 64, 64), color('teal'), 84, 84, 96, 96, () => { console.log("button clicked!"); });
+
+    state.init();
 }
+
 
 // tick ------------------------------------------------------------
 function draw() {
+
     background(0);
 
-    // animation stuff ---------------------------------------------
+    // animation stuff
     frame++;
-    newAnimationFrame = (frame % animationSpeed === 0);
-    if (newAnimationFrame) { frameIndex = (frameIndex + 1) % numFrames }
+    if (frame % animationSpeed === 0) { frameIndex = (frameIndex + 1) % numFrames }
 
-    // ui stuff ----------------------------------------------------
-    // mouse
-    if (newAnimationFrame) { drawCursor(); }
+    // ui
+    uiElements.forEach((e) => { e.update(); e.show(); });
 
+    // decide what to do based on the state
+    switch (state.state) {
+        case 'none':
+            console.log("this is not supposed to be possible!");
+            break;
 
-    // update objects ----------------------------------------------
-    playButton.update();
+        case 'mainMenu':
+            break;
+        case 'paused':
+            break;
+        case 'gaming':
+            break;
 
-    // draw game objects -------------------------------------------
-    playButton.show();
-
+        default:
+            break;
+    }
 
 
     drawCursor();
@@ -105,6 +157,7 @@ function Sprite(strip, posX, posY, width, height) {
 
 // Button class ----------------------------------------------------
 function Button(sprite, bColor, posX, posY, width, height, onClick) {
+    // this.sprite = new Sprite(strip, posX, posY, width, height);
     this.sprite = sprite;
     this.bColor = bColor;
     this.posX = posX;
@@ -154,11 +207,16 @@ function Button(sprite, bColor, posX, posY, width, height, onClick) {
         rect(this.tempX * scale, this.tempY * scale, this.tempWidth * scale, this.tempHeight * scale);
 
         // draw sprite
-        sprite.show();
+        this.sprite.show();
 
     };
 
 }
+
+function QuickButton(strip, posX, posY, onClick) {
+    return new Button(new Sprite(strip, posX + 18, posY + 18, 64, 64), teal, posX, posY, 100, 100, onClick);
+}
+
 
 function mouseClicked() { if (currentHover !== null) { currentHover.onClick(); } }
 
