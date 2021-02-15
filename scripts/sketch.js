@@ -50,6 +50,9 @@ function draw() {
     if (newAnimationFrame) { updateCursor(); }
 
 
+    // update objects ----------------------------------------------
+    playButton.update();
+
     // draw game objects -------------------------------------------
     playButton.show();
 
@@ -108,7 +111,7 @@ function Button(sprite, bColor, posX, posY, width, height, onclick) {
     this.tempWidth = this.width;
     this.tempHeight = this.height;
 
-    this.show = function () {
+    this.update = function () {
 
         // determine hover
         if (mouseX / scale > this.tempX && mouseX / scale < this.tempX + this.tempWidth && mouseY / scale > this.tempY && mouseY / scale < this.tempY + this.tempHeight) {
@@ -129,13 +132,16 @@ function Button(sprite, bColor, posX, posY, width, height, onclick) {
                 // exit hover
                 currentHover = null;
                 updateCursor();
-                
+
                 this.tempX = this.posX;
                 this.tempY = this.posY;
                 this.tempWidth = this.width;
                 this.tempHeight = this.height;
             }
         }
+    }
+
+    this.show = function () {
 
         // draw box
         fill(this.bColor);
