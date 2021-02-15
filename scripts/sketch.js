@@ -4,8 +4,10 @@ const aspectRatio = 16 / 9;
 let currentHover = null;
 
 let playSpriteStrip;
-let playSprite;
 let playButton;
+
+let cursorSpriteStrip;
+
 
 // animation stuff
 let frame = 0;
@@ -23,22 +25,25 @@ let scale = 1;
 function preload() {
 
     playSpriteStrip = loadImage('assets/play.png');
+    cursorSpriteStrip = loadImage('assets/cursor.png');
 }
 
 function setup() {
 
     // canvas
-    createCanvas(100, 100).parent('canvasholder');
+    createCanvas(100, 100).parent('canvasholder').mouseOut(() => { cursor(); }).mouseOver(() => { noCursor(); });
     sizeCanvas();
 
     // ui
-    playSprite = new Sprite(playSpriteStrip, 4, 25, 100, 100, 64, 64);
-    playButton = new Button(playSprite, color('teal'), 84, 84, 96, 96, () => { console.log("button clicked!"); });
+    noCursor();
+    playButton = new Button(new Sprite(playSpriteStrip, 100, 100, 64, 64), color('teal'), 84, 84, 96, 96, () => { console.log("button clicked!"); });
 }
 
 // tick ------------------------------------------------------------
 function draw() {
     background(0);
+
+    console.log("x: " + mouseX + ", y: " + mouseY);
 
     // animation stuff ---------------------------------------------
     frame++;
@@ -47,7 +52,7 @@ function draw() {
 
     // ui stuff ----------------------------------------------------
     // mouse
-    if (newAnimationFrame) { updateCursor(); }
+    if (newAnimationFrame) { drawCursor(); }
 
 
     // update objects ----------------------------------------------
@@ -58,9 +63,12 @@ function draw() {
 
 
 
-
+    drawCursor();
 
 }
+
+// utility functions -----------------------------------------------
+const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 
 // handeling boring stuff ------------------------------------------
 function windowResized() {
@@ -78,20 +86,17 @@ function sizeCanvas() {
 
 // Sprite class ----------------------------------------------------
 // yoink from https://stackoverflow.com/questions/59810654/spritesheet-animation-disappears-p5-js
-function Sprite(strip, numFrames, speed, posX, posY, width, height) {
+function Sprite(strip, posX, posY, width, height) {
     this.strip = strip;
-    this.numFrames = numFrames;
-    this.speed = speed;
-    
+
     this.posX = posX;
     this.posY = posY;
-    
+
     this.width = width;
     this.height = height;
-    
+
     this.show = function () {
-        let index = floor(frame / speed) % numFrames;
-        image(this.strip, this.posX * scale, this.posY * scale, this.width * scale, this.height * scale, this.width * index, 0, this.width, this.height);
+        image(this.strip, this.posX * scale, this.posY * scale, this.width * scale, this.height * scale, this.width * frameIndex, 0, this.width, this.height);
     }
 }
 
@@ -124,7 +129,6 @@ function Button(sprite, bColor, posX, posY, width, height, onClick) {
             if (this !== currentHover) {
                 // enter hover
                 currentHover = this;
-                updateCursor();
 
                 this.tempX = this.posX - this.delta;
                 this.tempY = this.posY - this.delta;
@@ -136,7 +140,6 @@ function Button(sprite, bColor, posX, posY, width, height, onClick) {
             if (this === currentHover) {
                 // exit hover
                 currentHover = null;
-                updateCursor();
 
                 this.tempX = this.posX;
                 this.tempY = this.posY;
@@ -159,16 +162,10 @@ function Button(sprite, bColor, posX, posY, width, height, onClick) {
 
 }
 
-function mouseClicked() {
-    if (currentHover !== null) {
-        currentHover.onClick();
-    }
-}
+function mouseClicked() { if (currentHover !== null) { currentHover.onClick(); } }
 
-function updateCursor() {
-    if (currentHover === null) {
-        cursor("assets/mouse" + frameIndex + ".png");
-    } else {
-        cursor("assets/hand" + frameIndex + ".png")
+function drawCursor() {
+    if (mouseX >= 0 && mouseY >= 0) {
+        image(cursorSpriteStrip, clamp(mouseX, 0, width), clamp(mouseY, 0, height), 32 * scale, 32 * scale, ((currentHover ? 4 : 0) + frameIndex) * 32, 0, 32, 32);
     }
 }
