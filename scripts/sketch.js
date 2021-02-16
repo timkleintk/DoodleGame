@@ -7,6 +7,8 @@ let teal;
 // ui
 let uiElements = [];
 let currentHover = null;
+
+
 const buttonPadding = 10;
 const letterWidth = 16;
 // medicins
@@ -39,6 +41,8 @@ let scale = 1;
 
 // misc
 let gameObjects = [];
+const gravity = 10;
+
 
 // state machine functions -----------------------------------------
 let state = new StateMachine({
@@ -67,7 +71,7 @@ function startNewGame() {
     // reset game objects
     gameObjects = [];
     for (let i = 0; i < numMedicins; i++) {
-        gameObjects.push(new Medicine(i, medX + i * medSpacing, medY));
+        gameObjects.push(new Medicine(i, medX + i * medSpacing, medY, true));
     }
 
     // reset names
@@ -207,7 +211,10 @@ function sizeCanvas() {
     resizeCanvas(canvasWidth, canvasHeiht);
 }
 
-function mouseClicked() { if (currentHover !== null) { currentHover.onClick(); } }
+
+function mouseClicked() { if (currentHover !== null && currentHover.onClick) { currentHover.onClick(); } }
+function mousePressed() { if (currentHover !== null && currentHover.onMouseDown) { currentHover.onMouseDown(); } }
+function mouseReleased() { if (currentHover !== null && currentHover.onMouseUp) { currentHover.onMouseUp(); } }
 
 
 // drawing stuff ---------------------------------------------------
@@ -224,9 +231,9 @@ function drawName(id, posX, posY) {
 function drawCursor() {
     if (mouseX >= -1 && mouseY >= -1) {
         if (currentHover !== null) {
-            image(cursorSpriteStrip, mouseX, mouseY, 32 * scale, 32 * scale,  (frameIndex + (mouseIsPressed ? 8 : 4)) * 32, 0, 32, 32);
+            image(cursorSpriteStrip, mouseX, mouseY, 32 * scale, 32 * scale, (frameIndex + (mouseIsPressed ? 8 : 4)) * 32, 0, 32, 32);
         } else {
-            image(cursorSpriteStrip, mouseX, mouseY, 32 * scale, 32 * scale,  frameIndex * 32, 0, 32, 32);
+            image(cursorSpriteStrip, mouseX, mouseY, 32 * scale, 32 * scale, frameIndex * 32, 0, 32, 32);
         }
     }
 }
@@ -312,9 +319,13 @@ function Medicine(id, posX, posY, onScreen) {
     this.posX = posX;
     this.posY = posY;
     this.onScreen = onScreen;
+    this.grabbed = mouseIsPressed;
 
     this.update = function () {
-        if (mouseX / scale > this.posX && mouseX / scale < this.posX + medSpacing && mouseY / scale > this.posY && mouseY / scale < this.posY + medSpacing) {
+
+        // hover stuff
+        if (this.grabbed) { currentHover = this; }
+        else if (mouseX / scale > this.posX && mouseX / scale < this.posX + medSpacing && mouseY / scale > this.posY && mouseY / scale < this.posY + medSpacing) {
             if (currentHover !== this) {
                 // enter hover
                 currentHover = this;
@@ -322,13 +333,46 @@ function Medicine(id, posX, posY, onScreen) {
         } else if (currentHover === this) {
             // exit hover
             currentHover = null;
+        }
 
+        if (!this.onScreen) {
+            if (!this.grabbed) {
+                this.posY += gravity;
+                if (this.posY > height / scale) {
+                    let index = gameObjects.indexOf(this);
+                    if (index !== -1) {
+                        gameObjects.splice(index, 1);
+                    }
+                }
+        //         this.posX = mouseX / scale + this.posX;
+        //         this.posY = mouseY / scale + this.posY;
+            }
         }
     }
 
     this.show = function () {
-        drawFrame(medicinSpriteStrips[this.id], this.posX, this.posY);
-        drawName(this.id, this.posX, this.posY + medSpacing);
+        if (this.onScreen) {
+            drawName(this.id, this.posX, this.posY + medSpacing);
+        }
+        if (this.grabbed) {
+            drawFrame(medicinSpriteStrips[this.id], this.posX + mouseX / scale, this.posY + mouseY / scale);
+        } else {
+            drawFrame(medicinSpriteStrips[this.id], this.posX, this.posY);
+        }
+    }
+
+    this.onMouseDown = function () {
+        if (this.onScreen) {
+            gameObjects.push(new Medicine(this.id, this.posX - mouseX / scale, this.posY - mouseY / scale, false));
+        }
+    }
+
+    this.onMouseUp = function() {
+        if (this.grabbed) {
+            this.grabbed = false;
+            this.posX += mouseX / scale;
+            this.posY += mouseY / scale;
+        }
     }
 }
 
