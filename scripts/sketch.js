@@ -7,7 +7,12 @@ let teal;
 // ui
 let uiElements = [];
 let currentHover = null;
-let buttonPadding = 10;
+const buttonPadding = 10;
+const letterWidth = 16;
+// medicins
+let medX = 450;
+let medY = 240;
+let medSpacing = 100;
 
 // images
 let playSpriteStrip;
@@ -16,15 +21,12 @@ let crossSpriteStrip;
 let cursorSpriteStrip;
 let officeSpriteStrip;
 const numLetters = 20;
-let letters = [];
+let letterSpriteStrips = [];
 const numMedicins = 3;
-let medicins = [];
+let medicinSpriteStrips = [];
 
-// medicins
-let medX = 450;
-let medY = 240;
-let medPadding = 50;
-let medSpacing = 100;
+const nameLength = 4;
+let medicineNames = [];
 
 // animation stuff
 let frame = 0;
@@ -34,6 +36,9 @@ const animationSpeed = 25;
 
 // scale is based on 1200x675
 let scale = 1;
+
+// misc
+let gameObjects = [];
 
 // state machine functions -----------------------------------------
 let state = new StateMachine({
@@ -45,31 +50,45 @@ let state = new StateMachine({
         { name: 'resumeGame', from: 'paused', to: 'gaming' },
     ],
     methods: {
-        onInit: () => { loadMainMenuUI(); },
-        onStartNewGame: () => { loadGameUI(); },
+        onInit: () => { loadMainMenu(); },
+        onStartNewGame: () => { startNewGame(); },
         onPauseGame: () => { loadPauseUI(); },
-        onExitToMainMenu: () => { loadMainMenuUI(); },
+        onExitToMainMenu: () => { loadMainMenu(); },
         onResumeGame: () => { loadGameUI(); },
     }
 })
 
-function loadMainMenuUI() {
+function loadMainMenu() {
     uiElements = [];
     uiElements.push(QuickButton(playSpriteStrip, 20, 20, () => { state.startNewGame(); }));
+}
+
+function startNewGame() {
+    // reset game objects
+    gameObjects = [];
+    for (let i = 0; i < numMedicins; i++) {
+        gameObjects.push(new Medicine(i, medX + i * medSpacing, medY));
+    }
+
+    // reset names
+    medicineNames = [];
+    for (let i = 0; i < numMedicins; i++) {
+        let name = [];
+        for (let j = 0; j < nameLength; j++) {
+            name.push(Math.floor(Math.random() * numLetters));
+        }
+        medicineNames.push(name);
+    }
+
+    loadGameUI();
 }
 
 function loadGameUI() {
     uiElements = [];
     uiElements.push(QuickButton(pauseSpriteStrip, 20, 20, () => { state.pauseGame(); }))
-    
-    // medicine stuff
-    for (let i = 0; i < numMedicins; i++) {
-        uiElements.push(QuickButton(medicins[i], medX + i * medSpacing, medY, () => { }));
-        let string = "";
-        for (let j = 0; j < 6; j++) { string += Math.floor(Math.random() * 10); }
-        uiElements.push(new Text(string, medX + i * medSpacing, medY + medSpacing));
-    }
 }
+
+
 
 function loadPauseUI() {
     uiElements = [];
@@ -89,11 +108,11 @@ function preload() {
     officeSpriteStrip = loadImage('assets/office.ss.png');
 
     for (let i = 0; i < numLetters; i++) {
-        letters.push(loadImage('assets/weirdSymbols/' + i + '.ss.png'));
+        letterSpriteStrips.push(loadImage('assets/weirdSymbols/' + i + '.ss.png'));
     }
 
     for (let i = 0; i < numMedicins; i++) {
-        medicins.push(loadImage('assets/medicins/' + i + '.ss.png'));
+        medicinSpriteStrips.push(loadImage('assets/medicins/' + i + '.ss.png'));
     }
 
 
@@ -135,9 +154,12 @@ function draw() {
         case 'paused':
             break;
         case 'gaming':
-            // draw the office stuff
+            // draw the background
             drawFrame(officeSpriteStrip, 0, 0, officeSpriteStrip.width / 4, officeSpriteStrip.height);
 
+           gameObjects.forEach(o => o.update());
+           gameObjects.forEach(o => o.show());
+                        
             break;
 
         default:
@@ -156,7 +178,25 @@ function draw() {
 // utility functions -----------------------------------------------
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 
-// handeling boring stuff ------------------------------------------
+function QuickButton(strip, posX, posY, onClick) {
+    return new Button(
+        new Sprite(
+            strip,
+            posX + buttonPadding,
+            posY + buttonPadding,
+            false
+        ),
+        teal,
+        posX,
+        posY,
+        strip.width / numFrames + 2 * buttonPadding,
+        strip.height + 2 * buttonPadding,
+        onClick
+    );
+}
+
+
+// handeling events stuff ------------------------------------------
 function windowResized() { sizeCanvas(); }
 
 function sizeCanvas() {
@@ -167,34 +207,56 @@ function sizeCanvas() {
     resizeCanvas(canvasWidth, canvasHeiht);
 }
 
-// Sprite class ----------------------------------------------------
-// yoink from https://stackoverflow.com/questions/59810654/spritesheet-animation-disappears-p5-js
-function Sprite(strip, posX, posY, width, height) {
-    this.strip = strip;
+function mouseClicked() { if (currentHover !== null) { currentHover.onClick(); } }
 
-    this.posX = posX;
-    this.posY = posY;
 
-    this.width = width;
-    this.height = height;
-
-    this.show = function () { drawFrame(this.strip, this.posX, this.posY) }
-}
-
+// drawing stuff ---------------------------------------------------
 function drawFrame(strip, posX, posY) {
     image(strip, posX * scale, posY * scale, strip.width / numFrames * scale, strip.height * scale, strip.width / numFrames * frameIndex, 0, strip.width / numFrames, strip.height);
 }
 
-function drawString(string, posX, posY) {
-
-    for (let i = 0; i < string.length; i++) {
-        drawFrame(letters[string[i]], posX + 16 * i, posY);
+function drawName(id, posX, posY) {
+    for (let i = 0; i < nameLength; i++) {
+        drawFrame(letterSpriteStrips[medicineNames[id][i]], posX + letterWidth * i, posY);
     }
 }
 
+function drawCursor() {
+    if (mouseX >= -1 && mouseY >= -1) {
+        image(cursorSpriteStrip, clamp(mouseX, 0, width), clamp(mouseY, 0, height), 32 * scale, 32 * scale, ((currentHover ? 4 : 0) + frameIndex) * 32, 0, 32, 32);
+    }
+}
+
+
+
 // -----------------------------------------------------------------
-// ui stuff 
+// classes 
 // -----------------------------------------------------------------
+
+// Sprite class ----------------------------------------------------
+function Sprite(strip, posX, posY, clickable = false, onClick = () => {}) {
+
+    this.strip = strip;
+    this.posX = posX;
+    this.posY = posY;
+    this.clickable = clickable;
+    this.width = strip.width / numFrames;
+    this.height = strip.height;
+    this.onClick = onClick;
+
+
+    this.update = function () {
+        if (this.clickable && mouseX / scale > this.posX && mouseX / scale < this.posX + this.width && mouseY / scale > this.posY && mouseY / scale < this.posY + this.height) {
+            if (this !== currentHover) {
+                // enter hover
+                currentHover = this;
+            } else if (this === currentHover) {
+                currentHover = null;
+            }
+        }
+    }
+    this.show = function () { drawFrame(this.strip, this.posX, this.posY) }
+}
 
 // Button class ----------------------------------------------------
 function Button(sprite, bColor, posX, posY, width, height, onClick) {
@@ -216,12 +278,10 @@ function Button(sprite, bColor, posX, posY, width, height, onClick) {
                 // enter hover
                 currentHover = this;
             }
-        } else {
-            // no hover
-            if (this === currentHover) {
-                // exit hover
-                currentHover = null;
-            }
+        } else if (this === currentHover) {
+            // exit hover
+            currentHover = null;
+
         }
     }
 
@@ -243,38 +303,19 @@ function Button(sprite, bColor, posX, posY, width, height, onClick) {
 
 }
 
-function QuickButton(strip, posX, posY, onClick) {
-    return new Button(
-        new Sprite(
-            strip,
-            posX + buttonPadding,
-            posY + buttonPadding,
-            strip.width / numFrames,
-            strip.height / numFrames
-        ),
-        teal,
-        posX,
-        posY,
-        strip.width / numFrames + 2 * buttonPadding,
-        strip.height + 2 * buttonPadding,
-        onClick
-    );
-}
-
-function Text(string, posX, posY) {
-    this.string = string;
+function Medicine(id, posX, posY) {
+    this.id = id;
     this.posX = posX;
     this.posY = posY;
 
-    this.update = function() {}
-    this.show = function() { drawString(this.string, this.posX, this.posY); }
-    
-}
+    this.update = function() {
 
-function mouseClicked() { if (currentHover !== null) { currentHover.onClick(); } }
+    }
 
-function drawCursor() {
-    if (mouseX >= -1 && mouseY >= -1) {
-        image(cursorSpriteStrip, clamp(mouseX, 0, width), clamp(mouseY, 0, height), 32 * scale, 32 * scale, ((currentHover ? 4 : 0) + frameIndex) * 32, 0, 32, 32);
+    this.show = function() {
+        drawFrame(medicinSpriteStrips[this.id], this.posX, this.posY);
+        drawName(this.id, this.posX, this.posY + medSpacing);
     }
 }
+
+
