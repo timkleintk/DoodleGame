@@ -157,9 +157,9 @@ function draw() {
             // draw the background
             drawFrame(officeSpriteStrip, 0, 0, officeSpriteStrip.width / 4, officeSpriteStrip.height);
 
-           gameObjects.forEach(o => o.update());
-           gameObjects.forEach(o => o.show());
-                        
+            gameObjects.forEach(o => o.update());
+            gameObjects.forEach(o => o.show());
+
             break;
 
         default:
@@ -223,7 +223,11 @@ function drawName(id, posX, posY) {
 
 function drawCursor() {
     if (mouseX >= -1 && mouseY >= -1) {
-        image(cursorSpriteStrip, clamp(mouseX, 0, width), clamp(mouseY, 0, height), 32 * scale, 32 * scale, ((currentHover ? 4 : 0) + frameIndex) * 32, 0, 32, 32);
+        if (currentHover !== null) {
+            image(cursorSpriteStrip, mouseX, mouseY, 32 * scale, 32 * scale,  (frameIndex + (mouseIsPressed ? 8 : 4)) * 32, 0, 32, 32);
+        } else {
+            image(cursorSpriteStrip, mouseX, mouseY, 32 * scale, 32 * scale,  frameIndex * 32, 0, 32, 32);
+        }
     }
 }
 
@@ -234,7 +238,7 @@ function drawCursor() {
 // -----------------------------------------------------------------
 
 // Sprite class ----------------------------------------------------
-function Sprite(strip, posX, posY, clickable = false, onClick = () => {}) {
+function Sprite(strip, posX, posY, clickable = false, onClick = () => { }) {
 
     this.strip = strip;
     this.posX = posX;
@@ -303,16 +307,26 @@ function Button(sprite, bColor, posX, posY, width, height, onClick) {
 
 }
 
-function Medicine(id, posX, posY) {
+function Medicine(id, posX, posY, onScreen) {
     this.id = id;
     this.posX = posX;
     this.posY = posY;
+    this.onScreen = onScreen;
 
-    this.update = function() {
+    this.update = function () {
+        if (mouseX / scale > this.posX && mouseX / scale < this.posX + medSpacing && mouseY / scale > this.posY && mouseY / scale < this.posY + medSpacing) {
+            if (currentHover !== this) {
+                // enter hover
+                currentHover = this;
+            }
+        } else if (currentHover === this) {
+            // exit hover
+            currentHover = null;
 
+        }
     }
 
-    this.show = function() {
+    this.show = function () {
         drawFrame(medicinSpriteStrips[this.id], this.posX, this.posY);
         drawName(this.id, this.posX, this.posY + medSpacing);
     }
