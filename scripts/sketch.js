@@ -7,16 +7,24 @@ let teal;
 // ui
 let uiElements = [];
 let currentHover = null;
-
+let buttonPadding = 10;
 
 // images
 let playSpriteStrip;
 let pauseSpriteStrip;
 let crossSpriteStrip;
 let cursorSpriteStrip;
+let officeSpriteStrip;
 const numLetters = 20;
 let letters = [];
+const numMedicins = 3;
+let medicins = [];
 
+// medicins
+let medX = 450;
+let medY = 240;
+let medPadding = 50;
+let medSpacing = 100;
 
 // animation stuff
 let frame = 0;
@@ -37,28 +45,36 @@ let state = new StateMachine({
         { name: 'resumeGame', from: 'paused', to: 'gaming' },
     ],
     methods: {
-        onInit:             () => { loadMainMenuUI(); },
-        onStartNewGame:     () => { loadGameUI(); },
-        onPauseGame:        () => { loadPauseUI(); },
-        onExitToMainMenu:   () => { loadMainMenuUI(); },
-        onResumeGame:       () => { loadGameUI(); },
+        onInit: () => { loadMainMenuUI(); },
+        onStartNewGame: () => { loadGameUI(); },
+        onPauseGame: () => { loadPauseUI(); },
+        onExitToMainMenu: () => { loadMainMenuUI(); },
+        onResumeGame: () => { loadGameUI(); },
     }
 })
 
 function loadMainMenuUI() {
     uiElements = [];
-    uiElements.push(QuickButton(playSpriteStrip, 100, 100, () => { state.startNewGame(); }));
+    uiElements.push(QuickButton(playSpriteStrip, 20, 20, () => { state.startNewGame(); }));
 }
 
 function loadGameUI() {
     uiElements = [];
-    uiElements.push(QuickButton(pauseSpriteStrip, 100, 100, () => { state.pauseGame(); }))
+    uiElements.push(QuickButton(pauseSpriteStrip, 20, 20, () => { state.pauseGame(); }))
+    
+    // medicine stuff
+    for (let i = 0; i < numMedicins; i++) {
+        uiElements.push(QuickButton(medicins[i], medX + i * medSpacing, medY, () => { }));
+        let string = "";
+        for (let j = 0; j < 6; j++) { string += Math.floor(Math.random() * 10); }
+        uiElements.push(new Text(string, medX + i * medSpacing, medY + medSpacing));
+    }
 }
 
 function loadPauseUI() {
     uiElements = [];
-    uiElements.push(QuickButton(playSpriteStrip, 100, 100, () => { state.resumeGame(); }));
-    uiElements.push(QuickButton(crossSpriteStrip, 220, 100, () => { state.exitToMainMenu(); }))
+    uiElements.push(QuickButton(playSpriteStrip, 20, 20, () => { state.resumeGame(); }));
+    uiElements.push(QuickButton(crossSpriteStrip, 150, 20, () => { state.exitToMainMenu(); }))
 
 }
 
@@ -70,11 +86,17 @@ function preload() {
     pauseSpriteStrip = loadImage('assets/pause.png');
     crossSpriteStrip = loadImage('assets/cross.png');
     cursorSpriteStrip = loadImage('assets/cursor.png');
+    officeSpriteStrip = loadImage('assets/office.ss.png');
 
-
-    for(let i = 0; i < numLetters; i++) {
+    for (let i = 0; i < numLetters; i++) {
         letters.push(loadImage('assets/weirdSymbols/' + i + '.ss.png'));
     }
+
+    for (let i = 0; i < numMedicins; i++) {
+        medicins.push(loadImage('assets/medicins/' + i + '.ss.png'));
+    }
+
+
 }
 
 function setup() {
@@ -101,13 +123,6 @@ function draw() {
     frame++;
     if (frame % animationSpeed === 0) { frameIndex = (frameIndex + 1) % numFrames }
 
-    // ui
-    uiElements.forEach((e) => { e.update(); e.show(); });
-
-    for (let i = 0; i < numLetters; i++) {
-        drawFrame(letters[i], 10 + 16*i, 200, 16, 24);
-    }
-
 
     // decide what to do based on the state
     switch (state.state) {
@@ -120,12 +135,19 @@ function draw() {
         case 'paused':
             break;
         case 'gaming':
+            // draw the office stuff
+            drawFrame(officeSpriteStrip, 0, 0, officeSpriteStrip.width / 4, officeSpriteStrip.height);
+
             break;
 
         default:
             break;
     }
 
+
+
+    // ui
+    uiElements.forEach((e) => { e.update(); e.show(); });
 
     drawCursor();
 
@@ -156,23 +178,17 @@ function Sprite(strip, posX, posY, width, height) {
     this.width = width;
     this.height = height;
 
-    this.show = function () { drawFrame(this.strip, this.posX, this.posY, this.width, this.height); }
+    this.show = function () { drawFrame(this.strip, this.posX, this.posY) }
 }
 
-function drawFrame(strip, posX, posY, width, height) {
-    image(strip, posX * scale, posY * scale, width * scale, height * scale, width * frameIndex, 0, width, height);
+function drawFrame(strip, posX, posY) {
+    image(strip, posX * scale, posY * scale, strip.width / numFrames * scale, strip.height * scale, strip.width / numFrames * frameIndex, 0, strip.width / numFrames, strip.height);
 }
 
 function drawString(string, posX, posY) {
-    let x = posX;
-    let y = posY;
 
     for (let i = 0; i < string.length; i++) {
-        let encoding = defaultFont[string[i]];
-        for (let j = 0; j < encoding.length; j++) {
-            drawFrame(segments[encoding[j]], x, y, 64, 128);
-        }
-        x += 64;
+        drawFrame(letters[string[i]], posX + 16 * i, posY);
     }
 }
 
@@ -191,36 +207,20 @@ function Button(sprite, bColor, posX, posY, width, height, onClick) {
     this.height = height;
     this.onClick = onClick;
 
-    this.delta = 10;
-    this.tempX = this.posX;
-    this.tempY = this.posY;
-    this.tempWidth = this.width;
-    this.tempHeight = this.height;
-
     this.update = function () {
 
         // determine hover
-        if (mouseX / scale > this.tempX && mouseX / scale < this.tempX + this.tempWidth && mouseY / scale > this.tempY && mouseY / scale < this.tempY + this.tempHeight) {
+        if (mouseX / scale > this.posX && mouseX / scale < this.posX + this.width && mouseY / scale > this.posY && mouseY / scale < this.posY + this.height) {
             // hover
             if (this !== currentHover) {
                 // enter hover
                 currentHover = this;
-
-                this.tempX = this.posX - this.delta;
-                this.tempY = this.posY - this.delta;
-                this.tempWidth = this.width + 2 * this.delta;
-                this.tempHeight = this.height + 2 * this.delta;
             }
         } else {
             // no hover
             if (this === currentHover) {
                 // exit hover
                 currentHover = null;
-
-                this.tempX = this.posX;
-                this.tempY = this.posY;
-                this.tempWidth = this.width;
-                this.tempHeight = this.height;
             }
         }
     }
@@ -229,7 +229,12 @@ function Button(sprite, bColor, posX, posY, width, height, onClick) {
 
         // draw box
         fill(this.bColor);
-        rect(this.tempX * scale, this.tempY * scale, this.tempWidth * scale, this.tempHeight * scale);
+        rect(
+            scale * (this.posX - (currentHover === this ? buttonPadding : 0)),
+            scale * (this.posY - (currentHover === this ? buttonPadding : 0)),
+            scale * (this.width + (currentHover === this ? 2 * buttonPadding : 0)),
+            scale * (this.height + (currentHover === this ? 2 * buttonPadding : 0))
+        );
 
         // draw sprite
         this.sprite.show();
@@ -239,9 +244,32 @@ function Button(sprite, bColor, posX, posY, width, height, onClick) {
 }
 
 function QuickButton(strip, posX, posY, onClick) {
-    return new Button(new Sprite(strip, posX + 18, posY + 18, 64, 64), teal, posX, posY, 100, 100, onClick);
+    return new Button(
+        new Sprite(
+            strip,
+            posX + buttonPadding,
+            posY + buttonPadding,
+            strip.width / numFrames,
+            strip.height / numFrames
+        ),
+        teal,
+        posX,
+        posY,
+        strip.width / numFrames + 2 * buttonPadding,
+        strip.height + 2 * buttonPadding,
+        onClick
+    );
 }
 
+function Text(string, posX, posY) {
+    this.string = string;
+    this.posX = posX;
+    this.posY = posY;
+
+    this.update = function() {}
+    this.show = function() { drawString(this.string, this.posX, this.posY); }
+    
+}
 
 function mouseClicked() { if (currentHover !== null) { currentHover.onClick(); } }
 
