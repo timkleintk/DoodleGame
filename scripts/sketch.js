@@ -395,6 +395,7 @@ function Medicine(id, posX, posY, onScreen) {
     this.onMouseUp = function () {
         if (this.grabbed) {
             this.grabbed = false;
+            currentHover = null;
         }
     }
 }
