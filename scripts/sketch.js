@@ -137,7 +137,7 @@ function preload() {
     }
 
     for (let i = 0; i < numFaceParts; i++) {
-        faceParts.push(loadImage('assets/faceParts/' + i + '.ss.png'));
+        faceParts.push(loadImage('assets/faceparts/' + i + '.ss.png'));
     }
 
 }
