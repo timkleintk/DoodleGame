@@ -16,16 +16,24 @@ let medX = 450;
 let medY = 240;
 let medSpacing = 100;
 
+
 // images
 let playSpriteStrip;
 let pauseSpriteStrip;
 let crossSpriteStrip;
 let cursorSpriteStrip;
 let officeSpriteStrip;
+let personSpriteStrip;
 const numLetters = 20;
 let letterSpriteStrips = [];
+
 const numMedicins = 3;
+const medicineEnum = { "strip": 0, "bottle": 1, "weed": 2 }
 let medicinSpriteStrips = [];
+
+const numFaceParts = 5;
+const facePartEnum = { "zigzag": 0, "sad": 1, "happy": 2, "booger": 3, "high": 4 }
+let faceParts = [];
 
 const nameLength = 4;
 let medicineNames = [];
@@ -74,6 +82,8 @@ function startNewGame() {
         gameObjects.push(new Medicine(i, medX + i * medSpacing, medY, true));
     }
 
+    gameObjects.push(new Person([0]));
+
     // reset names
     medicineNames = [];
     for (let i = 0; i < numMedicins; i++) {
@@ -110,6 +120,7 @@ function preload() {
     crossSpriteStrip = loadImage('assets/cross.png');
     cursorSpriteStrip = loadImage('assets/cursor.png');
     officeSpriteStrip = loadImage('assets/office.ss.png');
+    personSpriteStrip = loadImage('assets/person.ss.png');
 
     for (let i = 0; i < numLetters; i++) {
         letterSpriteStrips.push(loadImage('assets/weirdSymbols/' + i + '.ss.png'));
@@ -119,6 +130,9 @@ function preload() {
         medicinSpriteStrips.push(loadImage('assets/medicins/' + i + '.ss.png'));
     }
 
+    for (let i = 0; i < numFaceParts; i++) {
+        faceParts.push(loadImage('assets/faceParts/' + i + '.ss.png'));
+    }
 
 }
 
@@ -320,11 +334,17 @@ function Medicine(id, posX, posY, onScreen) {
     this.posY = posY;
     this.onScreen = onScreen;
     this.grabbed = mouseIsPressed;
+    this.offsetX = 0;
+    this.offsetY = 0;
 
     this.update = function () {
 
         // hover stuff
-        if (this.grabbed) { currentHover = this; }
+        if (this.grabbed) {
+            currentHover = this;
+            this.posX = mouseX / scale + this.offsetX;
+            this.posY = mouseY / scale + this.offsetY;
+        }
         else if (mouseX / scale > this.posX && mouseX / scale < this.posX + medSpacing && mouseY / scale > this.posY && mouseY / scale < this.posY + medSpacing) {
             if (currentHover !== this) {
                 // enter hover
@@ -344,8 +364,8 @@ function Medicine(id, posX, posY, onScreen) {
                         gameObjects.splice(index, 1);
                     }
                 }
-        //         this.posX = mouseX / scale + this.posX;
-        //         this.posY = mouseY / scale + this.posY;
+                //         this.posX = mouseX / scale + this.posX;
+                //         this.posY = mouseY / scale + this.posY;
             }
         }
     }
@@ -354,26 +374,82 @@ function Medicine(id, posX, posY, onScreen) {
         if (this.onScreen) {
             drawName(this.id, this.posX, this.posY + medSpacing);
         }
-        if (this.grabbed) {
-            drawFrame(medicinSpriteStrips[this.id], this.posX + mouseX / scale, this.posY + mouseY / scale);
-        } else {
-            drawFrame(medicinSpriteStrips[this.id], this.posX, this.posY);
-        }
+        drawFrame(medicinSpriteStrips[this.id], this.posX, this.posY);
     }
 
     this.onMouseDown = function () {
         if (this.onScreen) {
-            gameObjects.push(new Medicine(this.id, this.posX - mouseX / scale, this.posY - mouseY / scale, false));
+            let m = new Medicine(this.id, this.posX, this.posY, false);
+            m.offsetX = this.posX - mouseX / scale;
+            m.offsetY = this.posY - mouseY / scale;
+            gameObjects.push(m);
         }
     }
 
-    this.onMouseUp = function() {
+    this.onMouseUp = function () {
         if (this.grabbed) {
             this.grabbed = false;
-            this.posX += mouseX / scale;
-            this.posY += mouseY / scale;
         }
     }
 }
 
 
+// person class ----------------------------------------------------
+
+function Person() {
+    this.attributes = [facePartEnum.sad];
+    this.posX = 100;
+    this.posY = 250;
+
+    this.isHappy = function () {
+        return this.attributes.indexOf(facePartEnum.happy) !== -1;
+    }
+
+    this.makeHappy = function () {
+        let i = this.attributes.indexOf(facePartEnum.zigzag);
+        if (i !== -1) { this.attributes.splice(i, 1); }
+        i = this.attributes.indexOf(facePartEnum.sad);
+        if (i !== -1) { this.attributes.splice(i, 1); }
+        this.attributes.push(facePartEnum.happy);
+    }
+
+    this.makeHigh = function () {
+        this.attributes.push(facePartEnum.high);
+    }
+
+    this.update = function () {
+        let r = personSpriteStrip.width / numFrames / 2;
+        let cx = this.posX + r;
+        let cy = this.posY + r;
+
+        if (!this.isHappy()) {
+            gameObjects.forEach((o, i) => {
+                if (o instanceof Medicine && !o.onScreen && !o.grabbed) {
+                    let or = medicinSpriteStrips[o.id].width / numFrames / 2;
+                    let ocx = o.posX + or;
+                    let ocy = o.posY + or;
+                    if (sqrt((cx - ocx) ** 2 + (cy - ocy) ** 2) < r + or) {
+                        // consume
+
+                        if (o.id == medicineEnum.weed) {
+                            this.makeHigh();
+                            this.makeHappy();
+                        }
+
+
+
+                        gameObjects.splice(i, 1);
+
+                    }
+                }
+            });
+        }
+    }
+
+
+    this.show = function () {
+        drawFrame(personSpriteStrip, this.posX, this.posY);
+        this.attributes.forEach((i) => { drawFrame(faceParts[i], this.posX, this.posY); })
+    }
+
+}
