@@ -24,6 +24,9 @@ let crossSpriteStrip;
 let cursorSpriteStrip;
 let officeSpriteStrip;
 let personSpriteStrip;
+let speechSpriteStrip;
+let skipSpriteStrip;
+
 const numLetters = 20;
 let letterSpriteStrips = [];
 
@@ -100,6 +103,7 @@ function startNewGame() {
 function loadGameUI() {
     uiElements = [];
     uiElements.push(QuickButton(pauseSpriteStrip, 20, 20, () => { state.pauseGame(); }))
+    uiElements.push(QuickButton(skipSpriteStrip, 150, 20, () => { startNewGame(); }))
 }
 
 
@@ -121,6 +125,8 @@ function preload() {
     cursorSpriteStrip = loadImage('assets/cursor.png');
     officeSpriteStrip = loadImage('assets/office.ss.png');
     personSpriteStrip = loadImage('assets/person.ss.png');
+    speechSpriteStrip = loadImage('assets/speech.ss.png');
+    skipSpriteStrip = loadImage('assets/skip.ss.png');
 
     for (let i = 0; i < numLetters; i++) {
         letterSpriteStrips.push(loadImage('assets/weirdSymbols/' + i + '.ss.png'));
@@ -463,6 +469,8 @@ function Person() {
     this.show = function () {
         drawFrame(personSpriteStrip, this.posX, this.posY);
         this.attributes.forEach((i) => { drawFrame(faceParts[i], this.posX, this.posY); })
+        drawFrame(speechSpriteStrip, this.posX + 75, this.posY - 50);
+        drawName(this.needs, this.posX + 90, this.posY - 40);
     }
 
 }
