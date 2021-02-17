@@ -31,8 +31,8 @@ const numMedicins = 3;
 const medicineEnum = { "strip": 0, "bottle": 1, "weed": 2 }
 let medicinSpriteStrips = [];
 
-const numFaceParts = 5;
-const facePartEnum = { "zigzag": 0, "sad": 1, "happy": 2, "booger": 3, "high": 4 }
+const numFaceParts = 6;
+const facePartEnum = { "zigzag": 0, "sad": 1, "happy": 2, "booger": 3, "high": 4, "dead": 5 }
 let faceParts = [];
 
 const nameLength = 4;
@@ -398,23 +398,32 @@ function Medicine(id, posX, posY, onScreen) {
 
 function Person() {
     this.attributes = [facePartEnum.sad];
+    this.needs = floor(random() * numMedicins);
     this.posX = 100;
     this.posY = 250;
+
+    this.removeAttribute = function (a) {
+        let i = this.attributes.indexOf(a);
+        if (i !== -1) { this.attributes.splice(i, 1); }
+    } 
 
     this.isHappy = function () {
         return this.attributes.indexOf(facePartEnum.happy) !== -1;
     }
 
     this.makeHappy = function () {
-        let i = this.attributes.indexOf(facePartEnum.zigzag);
-        if (i !== -1) { this.attributes.splice(i, 1); }
-        i = this.attributes.indexOf(facePartEnum.sad);
-        if (i !== -1) { this.attributes.splice(i, 1); }
+        this.removeAttribute(facePartEnum.zigzag);
+        this.removeAttribute(facePartEnum.dead);
+        this.removeAttribute(facePartEnum.sad);
         this.attributes.push(facePartEnum.happy);
     }
 
     this.makeHigh = function () {
         this.attributes.push(facePartEnum.high);
+    }
+
+    this.makeDead = function () {
+        this.attributes = [facePartEnum.zigzag, facePartEnum.dead];
     }
 
     this.update = function () {
@@ -431,9 +440,13 @@ function Person() {
                     if (sqrt((cx - ocx) ** 2 + (cy - ocy) ** 2) < r + or) {
                         // consume
 
-                        if (o.id == medicineEnum.weed) {
-                            this.makeHigh();
+                        if (o.id === this.needs) {
                             this.makeHappy();
+                            if (this.needs === medicineEnum.weed) {
+                                this.makeHigh();
+                            }
+                        } else {
+                            this.makeDead();
                         }
 
 
