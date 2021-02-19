@@ -103,6 +103,7 @@ function preload() {
     faceParts.forEach(name => {
         faceSpriteStrips[name] = loadImage('assets/face/' + name + '.ss.png');
     });
+    
     // headSpriteStrip = loadImage('assets/face/head.ss.png');
     // angryEyesSpriteStrip = loadImage('assets/face/angryEyes.ss.png');
     // sadEyesSpriteStrip = loadImage('assets/face/sadEyes.ss.png');
