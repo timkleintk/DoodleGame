@@ -12,13 +12,15 @@ function startNewGame() {
     // }
 
 
+    // ingredients on the shelf
     for (let i = 0; i < numIngredients; i++) {
         gameObjects.push(new Ingredient(i, medX + i * medSpacing, medY, true));
     }
 
-    gameObjects.push(new Person(100, 100));
-    gameObjects.push(new Blender(220, 400));
+    gameObjects.push(new Line(3));
 
+
+    gameObjects.push(new Blender(120, 400));
 
 
     // reset names

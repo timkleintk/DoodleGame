@@ -16,8 +16,8 @@ let currentHover = null;
 const buttonPadding = 10;
 const letterWidth = 16;
 // medicins
-let medX = 450;
-let medY = 240;
+let medX = 550;
+let medY = 550;
 let medSpacing = 100;
 
 
@@ -68,6 +68,8 @@ let scale = 1;
 let gameObjects = [];
 const gravity = 10;
 
+const personSpacing = 250;
+const walkSpeed = 10;
 
 // state machine functions -----------------------------------------
 let state = new StateMachine({
@@ -86,3 +88,5 @@ let state = new StateMachine({
         onResumeGame: () => { loadGameUI(); },
     }
 })
+
+// crafting system

@@ -94,72 +94,16 @@ function QuickButton(strip, posX, posY, onClick) {
     );
 }
 
-function Shake(id, posX, posY, onCounter) {
-    this.id = id;
-    this.posX = posX;
-    this.posY = posY;
-    this.onCounter = onCounter;
-    this.grabbed = mouseIsPressed;
-    this.offsetX = 0;
-    this.offsetY = 0;
-
-    this.update = function () {
-
-        // hover stuff
-        if (this.grabbed) {
-            currentHover = this;
-            this.posX = mouseX / scale + this.offsetX;
-            this.posY = mouseY / scale + this.offsetY;
-        }
-        else if (mouseX / scale > this.posX && mouseX / scale < this.posX + shakeSpriteStrip.width / numFrames && mouseY / scale > this.posY && mouseY / scale < this.posY + shakeSpriteStrip.height) {
-            if (currentHover !== this) {
-                // enter hover
-                currentHover = this;
-            }
-        } else if (currentHover === this) {
-            // exit hover
-            currentHover = null;
-        }
-
-        if (!this.onCounter) {
-            if (!this.grabbed) {
-                this.posY += gravity;
-                if (this.posY > height / scale) {
-                    let index = gameObjects.indexOf(this);
-                    if (index !== -1) {
-                        gameObjects.splice(index, 1);
-                    }
-                }
-                //         this.posX = mouseX / scale + this.posX;
-                //         this.posY = mouseY / scale + this.posY;
-            }
-        }
-    }
-
-    this.show = function () {
-        drawFrame(shakeSpriteStrip, this.posX, this.posY);
-    }
-
-    this.onMouseDown = function () {
-        if (this.onCounter) {
-            this.onCounter = false;
-            this.offsetX = this.posX - mouseX / scale;
-            this.offsetY = this.posY - mouseY / scale;
-        }
-    }
-
-    this.onMouseUp = function () {
-        if (this.grabbed) {
-            this.grabbed = false;
-            currentHover = null;
-        }
-    }
-}
 
 
 // person class ----------------------------------------------------
 
 function Person(posX, posY) {
+    this.state = "inLine";
+
+    this.targetPosX = posX;
+    this.targetPosY = posY;
+
     this.attributes = [facePartEnum.sad];
     this.needs = floor(random() * numMedicins);
     this.posX = posX;
@@ -189,30 +133,27 @@ function Person(posX, posY) {
         this.attributes = [facePartEnum.zigzag, facePartEnum.dead];
     }
 
-    this.update = function () {
-        let r = personSpriteStrip.width / numFrames / 2;
-        let cx = this.posX + r;
-        let cy = this.posY + r;
+    this.walkAway = function () {
+        this.state = "walkAway";
+    }
 
-        if (!this.isHappy()) {
+    this.update = function () {
+
+        if (this.state === "aanDeBeurt") {
+            let r = personSpriteStrip.width / numFrames / 2;
+            let cx = this.posX + r;
+            let cy = this.posY + r;
             gameObjects.forEach((o, i) => {
                 if (o instanceof Shake && !o.onCounter && !o.grabbed) {
-                    let or = medicinSpriteStrips[o.id].width / numFrames / 2;
+                    let or = shakeSpriteStrip.width / numFrames / 2;
                     let ocx = o.posX + or;
                     let ocy = o.posY + or;
                     if (sqrt((cx - ocx) ** 2 + (cy - ocy) ** 2) < r + or) {
                         // consume
 
-                        if (o.id === this.needs) {
-                            this.makeHappy();
-                            if (this.needs === medicineEnum.weed) {
-                                this.makeHigh();
-                            }
-                        } else {
-                            this.makeDead();
-                        }
-
-
+                        // this.isAanDebeurt = false;
+                        this.walkAway();
+                        this.makeHappy();
 
                         gameObjects.splice(i, 1);
 
@@ -220,18 +161,32 @@ function Person(posX, posY) {
                 }
             });
         }
+        if (this.state === "inLine") {
+
+        }
+        if (this.state === "walkAway") {
+            this.posX += walkSpeed;
+            if (this.posX > width / scale) {
+                // offscreen
+                this.state = "offScreen";
+            }
+        }
     }
 
     this.show = function () {
+
+        // draw peron
         drawFrame(personSpriteStrip, this.posX, this.posY);
         this.attributes.forEach((i) => { drawFrame(facePartSpriteStrips[i], this.posX, this.posY); })
-        drawFrame(speechSpriteStrip, this.posX + 75, this.posY - 50);
-        drawName(this.needs, this.posX + 90, this.posY - 40);
+
+        // draw needs
+        if (this.state === "aanDeBeurt") {
+            drawFrame(speechSpriteStrip, this.posX + 75, this.posY - 50);
+            drawName(this.needs, this.posX + 90, this.posY - 40);
+        }
     }
 
 }
-
-// blender
 
 function Blender(posX, posY) {
     this.posX = posX;
@@ -283,26 +238,30 @@ function Blender(posX, posY) {
         this.lid.posX = this.posX;
         this.lid.posY = this.posY;
         this.lid.onClick = () => { this.openLid(); };
-        this.button.clickable = true;
+        if (this.contains.length > 0) {
+            this.button.clickable = true;
+        }
     }
 
     this.openLid = function () {
         this.isClosed = false;
-        this.lid.posX = this.posX - 200;
+        this.lid.posX = this.posX - 110;
         this.lid.posY = this.posY + 200;
         this.lid.onClick = () => { this.closeLid() };
         this.button.clickable = false;
     }
 
-    this.blend = function() {
+    this.blend = function () {
+        gameObjects.push(new Shake(this.contains, this.posX + 220, this.posY, true));
+
         this.contains = [];
         this.openLid();
+
     }
 
-    this.lid = new Sprite(lidSpriteStrip, this.posX - 200, this.posY + 200, true, () => { this.closeLid(); })
+    this.lid = new Sprite(lidSpriteStrip, this.posX - 110, this.posY + 200, true, () => { this.closeLid(); })
     this.button = new Sprite(buttonSpriteStrip, this.posX + 70, this.posY + 170, false, () => { this.blend(); });
 }
-
 
 
 function Ingredient(id, posX, posY, onShelf) {
@@ -366,5 +325,115 @@ function Ingredient(id, posX, posY, onShelf) {
             this.grabbed = false;
             currentHover = null;
         }
+    }
+}
+
+
+function Shake(ingredients, posX, posY, onCounter) {
+    this.ingredients = ingredients;
+    this.posX = posX;
+    this.posY = posY;
+    this.onCounter = onCounter;
+    this.grabbed = false;
+    this.offsetX = 0;
+    this.offsetY = 0;
+
+    this.update = function () {
+
+        // hover stuff
+        if (this.grabbed) {
+            currentHover = this;
+            this.posX = mouseX / scale + this.offsetX;
+            this.posY = mouseY / scale + this.offsetY;
+        }
+        else if (mouseX / scale > this.posX && mouseX / scale < this.posX + shakeSpriteStrip.width / numFrames && mouseY / scale > this.posY && mouseY / scale < this.posY + shakeSpriteStrip.height) {
+            if (currentHover !== this) {
+                // enter hover
+                currentHover = this;
+            }
+        } else if (currentHover === this) {
+            // exit hover
+            currentHover = null;
+        }
+
+        // falling off the screen
+        if (!this.onCounter && !this.grabbed) {
+            this.posY += gravity;
+            if (this.posY > height / scale) {
+                let index = gameObjects.indexOf(this);
+                if (index !== -1) {
+                    gameObjects.splice(index, 1);
+                }
+            }
+        }
+    }
+
+    this.show = function () {
+        drawFrame(shakeSpriteStrip, this.posX, this.posY);
+    }
+
+    this.onMouseDown = function () {
+        if (this.onCounter) {
+            this.onCounter = false;
+            this.grabbed = true;
+            this.offsetX = this.posX - mouseX / scale;
+            this.offsetY = this.posY - mouseY / scale;
+        }
+    }
+
+    this.onMouseUp = function () {
+        if (this.grabbed) {
+            this.grabbed = false;
+            currentHover = null;
+        }
+    }
+}
+
+
+function Line(length) {
+    this.length = length;
+    this.people = [];
+
+    this.state = "done";
+
+    // populate
+    for (let i = 0; i < this.length; i++) {
+        this.people.push(new Person(i * personSpacing, 100));
+    }
+    this.people[this.length - 1].state = "aanDeBeurt";
+
+    this.update = function () {
+
+        // update the peoples
+        this.people.forEach((p, i) => {
+            p.update();
+            if (p.state === "offScreen") {
+                this.people.splice(i, 1);
+                this.people.unshift(new Person(-personSpacing, 100));
+                this.state = "shuffling";
+            }
+        });
+
+        if (this.state === "shuffling") {
+            // gap in the line
+
+            this.state = "shuffled";
+            this.people.forEach((p, i) => {
+                if (i * personSpacing - p.posX < walkSpeed) {
+                    p.posX += i * personSpacing - p.posX;
+                } else {
+                    p.posX += walkSpeed;
+                    this.state = "shuffling";
+                }
+            });
+            if (this.state === "shuffled") {
+                // done shuffling
+                this.people[this.length - 1].state = "aanDeBeurt";
+            }
+        }
+    }
+
+    this.show = function () {
+        this.people.forEach(p => { p.show(); })
     }
 }
