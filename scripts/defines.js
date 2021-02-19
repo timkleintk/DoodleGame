@@ -37,6 +37,7 @@ let buttonSpriteStrip;
 let shakeSpriteStrip;
 let muteSpriteStrip;
 let unmuteSpriteStrip;
+let explosionSpriteStrip;
 
 const numLetters = 20;
 let letterSpriteStrips = [];

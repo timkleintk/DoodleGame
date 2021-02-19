@@ -89,6 +89,7 @@ function preload() {
     shakeSpriteStrip = loadImage('assets/ingredients/shake.ss.png');
     muteSpriteStrip = loadImage('assets/mute.ss.png');
     unmuteSpriteStrip = loadImage('assets/unmute.ss.png');
+    explosionSpriteStrip = loadImage('assets/explosion.ss.png');
 
     for (let i = 0; i < numLetters; i++) {
         letterSpriteStrips.push(loadImage('assets/weirdSymbols/' + i + '.ss.png'));
