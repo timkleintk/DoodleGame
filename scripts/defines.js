@@ -78,6 +78,8 @@ const personSpacing = 250;
 const walkSpeed = 10;
 const lineLenght = 3;
 
+let showNames = false;
+
 // state machine functions -----------------------------------------
 let state = new StateMachine({
     transitions: [

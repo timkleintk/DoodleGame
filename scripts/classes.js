@@ -15,7 +15,6 @@ function Sprite(strip, posX, posY, clickable = false, onClick = () => { }) {
 
 
     this.update = function () {
-        // console.log('updated sprite');
         if (this.clickable &&
             mouseX / scale > this.posX &&
             mouseX / scale < this.posX + this.width &&
@@ -130,7 +129,9 @@ function Person(posX, posY) {
         this.eyes = "angryEyes";
     }
 
-    this.isAngry = function () { return this.eyes == "angryEyes"; }
+
+
+    this.isAngry = function () { return this.eyes === "angryEyes"; }
     this.walkAway = function () {
         this.state = "walkAway";
     }
@@ -148,10 +149,7 @@ function Person(posX, posY) {
                     let ocy = o.posY + or;
                     if (sqrt((cx - ocx) ** 2 + (cy - ocy) ** 2) < r + or) {
                         // consume
-
-                        console.log("shake ingredients:");
                         o.ingredients.forEach(ingredient => {
-                            console.log(ingredient);
                             let needIndex = this.needs.indexOf(ingredient.id);
                             if (needIndex !== -1) {
                                 this.needs.splice(needIndex, 1);
@@ -221,6 +219,10 @@ function Person(posX, posY) {
         }
     }
 
+
+    this.explode = function() {
+        
+    }
 }
 
 function Blender(posX, posY) {
@@ -341,7 +343,10 @@ function Ingredient(id, posX, posY, onShelf) {
 
     this.show = function () {
         // if (this.onShelf) {
-            // drawName(this.id, this.posX, this.posY + medSpacing);
+            if (showNames) {
+
+                drawName(this.id, this.posX, this.posY + medSpacing);
+            }
         // }
         drawFrame(ingredientSpriteStrips[this.id], this.posX, this.posY);
     }
