@@ -79,7 +79,9 @@ const personSpacing = 250;
 const walkSpeed = 10;
 const lineLength = 3;
 
-let showNames = true;
+let showNames = false;
+
+let explosionTime = 100;
 
 // state machine functions -----------------------------------------
 let state = new StateMachine({
