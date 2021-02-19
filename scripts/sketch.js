@@ -89,6 +89,7 @@ function preload() {
     shakeSpriteStrip = loadImage('assets/ingredients/shake.ss.png');
     muteSpriteStrip = loadImage('assets/mute.ss.png');
     unmuteSpriteStrip = loadImage('assets/unmute.ss.png');
+    explosionSpriteStrip = loadImage('assets/explosion.ss.png');
 
     for (let i = 0; i < numLetters; i++) {
         letterSpriteStrips.push(loadImage('assets/weirdSymbols/' + i + '.ss.png'));
@@ -102,6 +103,7 @@ function preload() {
     faceParts.forEach(name => {
         faceSpriteStrips[name] = loadImage('assets/face/' + name + '.ss.png');
     });
+    
     // headSpriteStrip = loadImage('assets/face/head.ss.png');
     // angryEyesSpriteStrip = loadImage('assets/face/angryEyes.ss.png');
     // sadEyesSpriteStrip = loadImage('assets/face/sadEyes.ss.png');

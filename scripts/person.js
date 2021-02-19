@@ -116,6 +116,7 @@ Person.prototype.update = function () {
 
     if (this.state === "exploded") {
         //explosion code goes here
+        drawFrame(explosionSpriteStrip, this.posX, this.posY);
         console.log("person exploded!");
     }
 

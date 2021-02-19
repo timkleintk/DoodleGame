@@ -54,13 +54,11 @@ function playSound() {
         if (state.state == "mainMenu") {
             let i = floor(random() * menuAudios.length);
             while (menuAudios[i] === oldTrack) { i = floor(random() * menuAudios.length); }
-            console.log("playing menu track: " + i);
             menuAudios[i].play();
             currentTrack = menuAudios[i];
         } else {
             let i = floor(random() * audios.length);
             while (audios[i] === oldTrack) { i = floor(random() * audios.length); }
-            console.log("playing track: " + i);
             audios[i].play();
             currentTrack = audios[i];
         }
