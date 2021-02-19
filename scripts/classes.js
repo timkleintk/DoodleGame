@@ -2,6 +2,7 @@
 // classes 
 // -----------------------------------------------------------------
 
+
 // Sprite class ----------------------------------------------------
 function Sprite(strip, posX, posY, clickable = false, onClick = () => { }) {
 
