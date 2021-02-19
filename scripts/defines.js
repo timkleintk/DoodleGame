@@ -1,5 +1,10 @@
 const aspectRatio = 16 / 9;
 
+// audio
+let currentTrack = null;
+let audios = [];
+let menuAudios = [];
+
 // colors
 let teal;
 
@@ -25,6 +30,10 @@ let officeSpriteStrip;
 let personSpriteStrip;
 let speechSpriteStrip;
 let skipSpriteStrip;
+let blenderSpriteStrip;
+let lidSpriteStrip;
+let buttonSpriteStrip;
+let shakeSpriteStrip;
 
 const numLetters = 20;
 let letterSpriteStrips = [];
@@ -35,10 +44,16 @@ let medicinSpriteStrips = [];
 
 const numFaceParts = 6;
 const facePartEnum = { "zigzag": 0, "sad": 1, "happy": 2, "booger": 3, "high": 4, "dead": 5 }
-let faceParts = [];
+let facePartSpriteStrips = [];
 
 const nameLength = 4;
 let medicineNames = [];
+
+// ingredients
+const numIngredients = 6;
+const ingredientsEnum = {"mushroom": 0, "flask": 1, "bone": 2, "berries": 3, "corked": 4, "gunpowder": 5, "locked": 6}
+let ingredientSpriteStrips = [];
+
 
 // animation stuff
 let frame = 0;

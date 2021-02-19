@@ -1,16 +1,25 @@
 function loadMainMenu() {
     uiElements = [];
     uiElements.push(QuickButton(playSpriteStrip, 20, 20, () => { state.startNewGame(); }));
+    // playSound();
 }
 
 function startNewGame() {
     // reset game objects
     gameObjects = [];
-    for (let i = 0; i < numMedicins; i++) {
-        gameObjects.push(new Medicine(i, medX + i * medSpacing, medY, true));
+    // for (let i = 0; i < numMedicins; i++) {
+    // gameObjects.push(new Medicine(i, medX + i * medSpacing, medY, true));
+    // }
+
+
+    for (let i = 0; i < numIngredients; i++) {
+        gameObjects.push(new Ingredient(i, medX + i * medSpacing, medY, true));
     }
 
-    gameObjects.push(new Person([0]));
+    gameObjects.push(new Person(100, 100));
+    gameObjects.push(new Blender(220, 400));
+
+
 
     // reset names
     medicineNames = [];
@@ -23,6 +32,8 @@ function startNewGame() {
     }
 
     loadGameUI();
+
+    // playSound();
 }
 
 function loadGameUI() {
@@ -52,6 +63,10 @@ function preload() {
     personSpriteStrip = loadImage('assets/person.ss.png');
     speechSpriteStrip = loadImage('assets/speech.ss.png');
     skipSpriteStrip = loadImage('assets/skip.ss.png');
+    blenderSpriteStrip = loadImage('assets/ingredients/blender.ss.png');
+    lidSpriteStrip = loadImage('assets/ingredients/lid.ss.png');
+    buttonSpriteStrip = loadImage('assets/ingredients/button.ss.png');
+    shakeSpriteStrip = loadImage('assets/ingredients/shake.ss.png');
 
     for (let i = 0; i < numLetters; i++) {
         letterSpriteStrips.push(loadImage('assets/weirdSymbols/' + i + '.ss.png'));
@@ -62,10 +77,36 @@ function preload() {
     }
 
     for (let i = 0; i < numFaceParts; i++) {
-        faceParts.push(loadImage('assets/faceparts/' + i + '.ss.png'));
+        facePartSpriteStrips.push(loadImage('assets/faceparts/' + i + '.ss.png'));
     }
 
+    for (let i = 0; i < numIngredients; i++) {
+        ingredientSpriteStrips.push(loadImage('assets/ingredients/' + i + '.ss.png'));
+    }
+    ingredientSpriteStrips.push(loadImage('assets/ingredients/blender.ss.png'));
+
+    // audio
+    soundFormats('wav');
+    for (let i = 1; i < 4; i++) {
+        audios.push(loadSound('assets/audio/ScribbleJam_Loop' + i + '.wav'));
+        audios.push(loadSound('assets/audio/ScribbleJam_Loop' + i + '(bassless).wav'));
+    }
+
+    for (let i = 1; i < 3; i++) {
+        menuAudios.push(loadSound('assets/audio/ScribbleJam_Menu' + i + '.wav'));
+        menuAudios.push(loadSound('assets/audio/ScribbleJam_Menu' + i + '(bassless).wav'));
+    }
+
+    audios.forEach((a) => {
+        a.onended(audioCallback);
+    });
+    
+    menuAudios.forEach((a) => {
+        a.onended(audioCallback);
+    });
+
 }
+
 
 function setup() {
     // canvas
@@ -74,11 +115,12 @@ function setup() {
 
     // colors
     teal = color('teal');
-
+    
     // ui
     noCursor();
-
+    
     state.init();
+    playSound();
 }
 
 
@@ -99,12 +141,13 @@ function draw() {
             break;
 
         case 'mainMenu':
+            // state.startNewGame();
             break;
         case 'paused':
             break;
         case 'gaming':
             // draw the background
-            drawFrame(officeSpriteStrip, 0, 0, officeSpriteStrip.width / 4, officeSpriteStrip.height);
+            // drawFrame(officeSpriteStrip, 0, 0);
 
             gameObjects.forEach(o => o.update());
             gameObjects.forEach(o => o.show());
@@ -114,7 +157,6 @@ function draw() {
         default:
             break;
     }
-
 
 
     // ui

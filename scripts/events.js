@@ -10,7 +10,7 @@ function sizeCanvas() {
 }
 
 
-function mouseClicked() { if (currentHover !== null && currentHover.onClick) { currentHover.onClick(); } }
+function mouseClicked() { if (currentHover !== null && currentHover.onClick) { currentHover.onClick(); currentHover = null; } }
 function mousePressed() { if (currentHover !== null && currentHover.onMouseDown) { currentHover.onMouseDown(); } }
 function mouseReleased() { if (currentHover !== null && currentHover.onMouseUp) { currentHover.onMouseUp(); } }
 

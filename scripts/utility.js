@@ -20,3 +20,50 @@ function drawCursor() {
         }
     }
 }
+
+function whichTracks() {
+    playing = [];
+    audios.forEach((a, i) => {
+        if (a.isPlaying()) { playing.push(a); }
+    })
+
+    menuAudios.forEach((a, i) => {
+        if (a.isPlaying()) { playing.push(a); }
+    })
+
+    if (playing.length === 0) { return false; }
+    else return playing;
+}
+
+function audioCallback(arg) {
+    // make sure to handle the double callback calls:
+    if (currentTrack === arg) {
+        playSound();
+    }
+}
+
+function playSound() {
+    // make sure to only play one at a time
+    let oldTrack = currentTrack;
+    currentTrack = null;
+    if (oldTrack) { oldTrack.stop(); }    
+
+    let tracks = whichTracks();   
+    if (!tracks || (tracks.length == 1 && tracks[0] == oldTrack)) {
+        if (state.state == "mainMenu") {
+            let i = floor(random() * menuAudios.length);
+            while (menuAudios[i] === oldTrack) { i = floor(random() * menuAudios.length); }
+            console.log("playing menu track: " + i);
+            menuAudios[i].play();
+            currentTrack = menuAudios[i];
+        } else {
+            let i = floor(random() * audios.length);
+            while (audios[i] === oldTrack) { i = floor(random() * audios.length); }
+            console.log("playing track: " + i);
+            audios[i].play();
+            currentTrack = audios[i];
+        }
+
+    }
+
+}
