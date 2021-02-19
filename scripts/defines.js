@@ -76,7 +76,7 @@ const gravity = 10;
 
 const personSpacing = 250;
 const walkSpeed = 10;
-const lineLenght = 3;
+const lineLength = 3;
 
 let showNames = false;
 
