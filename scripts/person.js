@@ -93,7 +93,7 @@ Person.prototype.update = function () {
 }
 
 Person.prototype.CanConsume = function (shake) {
-    let r = personSpriteStrip.width / numFrames / 2;
+    let r = faceSpriteStrips.head.width / numFrames / 2;
     let cx = this.posX + r;
     let cy = this.posY + r;
     let or = shakeSpriteStrip.width / numFrames / 2;

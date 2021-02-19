@@ -38,6 +38,12 @@ let shakeSpriteStrip;
 let muteSpriteStrip;
 let unmuteSpriteStrip;
 let explosionSpriteStrip;
+let musicSpriteStrip;
+let musicCreditsSpriteStrip;
+let gameSpriteStrip;
+let extraCreditsSpriteStrip;
+let gameCreditsSpriteStrip;
+let gearSpriteStrip;
 
 const numLetters = 20;
 let letterSpriteStrips = [];
