@@ -17,9 +17,9 @@ let currentHover = null;
 const buttonPadding = 10;
 const letterWidth = 16;
 // medicins
-let medX = 550;
+let medX = 520;
 let medY = 550;
-let medSpacing = 100;
+let medSpacing = 110;
 
 
 // images

@@ -167,6 +167,7 @@ function draw() {
             break;
 
         case 'mainMenu':
+        case 'paused':
             // state.startNewGame();
             drawFrame(stethoscopeSpriteStrip, 0, 0);
 
@@ -177,8 +178,6 @@ function draw() {
             drawFrame(musicCreditsSpriteStrip, 800, 300);
 
             drawFrame(extraCreditsSpriteStrip, 800, 640);
-            break;
-        case 'paused':
             break;
         case 'gaming':
             // draw the background
