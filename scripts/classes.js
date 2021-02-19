@@ -101,38 +101,36 @@ function QuickButton(strip, posX, posY, onClick) {
 function Person(posX, posY) {
     this.state = "inLine";
 
+    this.mouth = "sadMouth";
+    this.eyes = "sadEyes";
+
     this.targetPosX = posX;
     this.targetPosY = posY;
 
-    this.attributes = [facePartEnum.sad];
-    this.needs = floor(random() * numMedicins);
+
+
+    this.needs = [floor(random() * numIngredients), floor(random() * numIngredients)];
+    this.received = [];
+
     this.posX = posX;
     this.posY = posY;
 
-    this.removeAttribute = function (a) {
-        let i = this.attributes.indexOf(a);
-        if (i !== -1) { this.attributes.splice(i, 1); }
-    }
-
-    this.isHappy = function () {
-        return this.attributes.indexOf(facePartEnum.happy) !== -1;
-    }
+    // this.removeFacePart = function (a) {
+    // let i = this.face.indexOf(a);
+    // if (i !== -1) { this.face.splice(i, 1); }
+    // }
 
     this.makeHappy = function () {
-        this.removeAttribute(facePartEnum.zigzag);
-        this.removeAttribute(facePartEnum.dead);
-        this.removeAttribute(facePartEnum.sad);
-        this.attributes.push(facePartEnum.happy);
+        this.mouth = "happyMouth";
+        this.eyes = "sadEyes";
     }
 
-    this.makeHigh = function () {
-        this.attributes.push(facePartEnum.high);
+    this.makeAngry = function () {
+        this.mouth = "sadMouth";
+        this.eyes = "angryEyes";
     }
 
-    this.makeDead = function () {
-        this.attributes = [facePartEnum.zigzag, facePartEnum.dead];
-    }
-
+    this.isAngry = function () { return this.eyes == "angryEyes"; }
     this.walkAway = function () {
         this.state = "walkAway";
     }
@@ -151,9 +149,20 @@ function Person(posX, posY) {
                     if (sqrt((cx - ocx) ** 2 + (cy - ocy) ** 2) < r + or) {
                         // consume
 
+                        console.log("shake ingredients:");
+                        o.ingredients.forEach(ingredient => {
+                            console.log(ingredient);
+                            let needIndex = this.needs.indexOf(ingredient.id);
+                            if (needIndex !== -1) {
+                                this.needs.splice(needIndex, 1);
+                            }
+                        });
+
                         // this.isAanDebeurt = false;
+                        if (!this.isAngry()) {
+                            this.makeHappy();
+                        }
                         this.walkAway();
-                        this.makeHappy();
 
                         gameObjects.splice(i, 1);
 
@@ -161,14 +170,32 @@ function Person(posX, posY) {
                 }
             });
         }
+
         if (this.state === "inLine") {
 
         }
+
         if (this.state === "walkAway") {
             this.posX += walkSpeed;
             if (this.posX > width / scale) {
                 // offscreen
-                this.state = "offScreen";
+                if (this.needs.length === 0) {
+                    this.state = "offScreen";
+                } else {
+                    // got the wrong thing
+                    this.state = "walkBack"
+                    this.mouth = "sadMouth";
+                    this.eyes = "angryEyes";
+                }
+            }
+        }
+
+        if (this.state === "walkBack") {
+            if (this.posX - (lineLenght - 1) * personSpacing < walkSpeed) {
+                this.posX = (lineLenght - 1) * personSpacing;
+                this.state = "aanDeBeurt";
+            } else {
+                this.posX -= walkSpeed;
             }
         }
     }
@@ -176,13 +203,21 @@ function Person(posX, posY) {
     this.show = function () {
 
         // draw peron
-        drawFrame(personSpriteStrip, this.posX, this.posY);
-        this.attributes.forEach((i) => { drawFrame(facePartSpriteStrips[i], this.posX, this.posY); })
+        // this.face.forEach(name => {
+        drawFrame(faceSpriteStrips["head"], this.posX, this.posY);
+        drawFrame(faceSpriteStrips[this.mouth], this.posX, this.posY);
+        drawFrame(faceSpriteStrips[this.eyes], this.posX, this.posY);
+        // })
+
+        // this.attributes.forEach((i) => { drawFrame(facePartSpriteStrips[i], this.posX, this.posY); })
 
         // draw needs
         if (this.state === "aanDeBeurt") {
             drawFrame(speechSpriteStrip, this.posX + 75, this.posY - 50);
-            drawName(this.needs, this.posX + 90, this.posY - 40);
+            this.needs.forEach((need, i) => {
+                drawName(need, this.posX + 82 + i * (nameLength + 1) * letterWidth, this.posY - 40);
+            });
+            
         }
     }
 
@@ -306,7 +341,7 @@ function Ingredient(id, posX, posY, onShelf) {
 
     this.show = function () {
         // if (this.onShelf) {
-        //     drawName(this.id, this.posX, this.posY + medSpacing);
+            // drawName(this.id, this.posX, this.posY + medSpacing);
         // }
         drawFrame(ingredientSpriteStrips[this.id], this.posX, this.posY);
     }
@@ -390,8 +425,8 @@ function Shake(ingredients, posX, posY, onCounter) {
 }
 
 
-function Line(length) {
-    this.length = length;
+function Line() {
+    this.length = lineLenght;
     this.people = [];
 
     this.state = "done";

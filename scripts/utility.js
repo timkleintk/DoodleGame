@@ -7,7 +7,7 @@ function drawFrame(strip, posX, posY) {
 
 function drawName(id, posX, posY) {
     for (let i = 0; i < nameLength; i++) {
-        drawFrame(letterSpriteStrips[medicineNames[id][i]], posX + letterWidth * i, posY);
+        drawFrame(letterSpriteStrips[ingredientNames[id][i]], posX + letterWidth * i, posY);
     }
 }
 
@@ -43,6 +43,7 @@ function audioCallback(arg) {
 }
 
 function playSound() {
+    if (muted) {return;}
     // make sure to only play one at a time
     let oldTrack = currentTrack;
     currentTrack = null;

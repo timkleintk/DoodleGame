@@ -1,6 +1,11 @@
-function loadMainMenu() {
+function loadMainMenuUI() {
     uiElements = [];
     uiElements.push(QuickButton(playSpriteStrip, 20, 20, () => { state.startNewGame(); }));
+    if (muted) {
+        uiElements.push(QuickButton(unmuteSpriteStrip, 280, 20, () => { muted = false; reloadUI(); playSound(); }))
+    } else {
+        uiElements.push(QuickButton(muteSpriteStrip, 280, 20, () => { muted = true; reloadUI(); currentTrack.stop(); }))
+    }
     // playSound();
 }
 
@@ -24,13 +29,13 @@ function startNewGame() {
 
 
     // reset names
-    medicineNames = [];
-    for (let i = 0; i < numMedicins; i++) {
+    ingredientNames = [];
+    for (let i = 0; i < numIngredients; i++) {
         let name = [];
         for (let j = 0; j < nameLength; j++) {
             name.push(Math.floor(Math.random() * numLetters));
         }
-        medicineNames.push(name);
+        ingredientNames.push(name);
     }
 
     loadGameUI();
@@ -41,7 +46,11 @@ function startNewGame() {
 function loadGameUI() {
     uiElements = [];
     uiElements.push(QuickButton(pauseSpriteStrip, 20, 20, () => { state.pauseGame(); }))
-    uiElements.push(QuickButton(skipSpriteStrip, 150, 20, () => { startNewGame(); }))
+    // if (muted) {
+        // uiElements.push(QuickButton(unmuteSpriteStrip, 150, 20, () => { muted = false; reloadUI(); playSound(); }))
+    // } else {
+        // uiElements.push(QuickButton(muteSpriteStrip, 150, 20, () => { muted = true; reloadUI(); currentTrack.stop(); }))
+    // }
 }
 
 
@@ -50,9 +59,18 @@ function loadPauseUI() {
     uiElements = [];
     uiElements.push(QuickButton(playSpriteStrip, 20, 20, () => { state.resumeGame(); }));
     uiElements.push(QuickButton(crossSpriteStrip, 150, 20, () => { state.exitToMainMenu(); }))
-
+    if (muted) {
+        uiElements.push(QuickButton(unmuteSpriteStrip, 280, 20, () => { muted = false; reloadUI(); playSound(); }))
+    } else {
+        uiElements.push(QuickButton(muteSpriteStrip, 280, 20, () => { muted = true; reloadUI(); currentTrack.stop(); }))
+    }
 }
 
+function reloadUI() {
+    if (state.state === "mainMenu") {loadMainMenuUI();}
+    if (state.state === "gaming") {loadGameUI();}
+    if (state.state === "paused") {loadPauseUI();}
+}
 
 // init ------------------------------------------------------------
 
@@ -69,23 +87,27 @@ function preload() {
     lidSpriteStrip = loadImage('assets/ingredients/lid.ss.png');
     buttonSpriteStrip = loadImage('assets/ingredients/button.ss.png');
     shakeSpriteStrip = loadImage('assets/ingredients/shake.ss.png');
+    muteSpriteStrip = loadImage('assets/mute.ss.png');
+    unmuteSpriteStrip = loadImage('assets/unmute.ss.png');
 
     for (let i = 0; i < numLetters; i++) {
         letterSpriteStrips.push(loadImage('assets/weirdSymbols/' + i + '.ss.png'));
-    }
-
-    for (let i = 0; i < numMedicins; i++) {
-        medicinSpriteStrips.push(loadImage('assets/medicins/' + i + '.ss.png'));
-    }
-
-    for (let i = 0; i < numFaceParts; i++) {
-        facePartSpriteStrips.push(loadImage('assets/faceparts/' + i + '.ss.png'));
     }
 
     for (let i = 0; i < numIngredients; i++) {
         ingredientSpriteStrips.push(loadImage('assets/ingredients/' + i + '.ss.png'));
     }
     ingredientSpriteStrips.push(loadImage('assets/ingredients/blender.ss.png'));
+
+    faceParts.forEach(name => {
+        faceSpriteStrips[name] = loadImage('assets/face/' + name + '.ss.png');
+    });
+    // headSpriteStrip = loadImage('assets/face/head.ss.png');
+    // angryEyesSpriteStrip = loadImage('assets/face/angryEyes.ss.png');
+    // sadEyesSpriteStrip = loadImage('assets/face/sadEyes.ss.png');
+    // sadMouthSpriteStrip = loadImage('assets/face/sadMouth.ss.png');
+    // happyMouthSpriteStrip = loadImage('assets/face/happyMouth.ss.png');
+
 
     // audio
     soundFormats('wav');
@@ -102,7 +124,7 @@ function preload() {
     audios.forEach((a) => {
         a.onended(audioCallback);
     });
-    
+
     menuAudios.forEach((a) => {
         a.onended(audioCallback);
     });
@@ -117,10 +139,10 @@ function setup() {
 
     // colors
     teal = color('teal');
-    
+
     // ui
     noCursor();
-    
+
     state.init();
     playSound();
 }

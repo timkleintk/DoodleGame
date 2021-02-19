@@ -4,6 +4,7 @@ const aspectRatio = 16 / 9;
 let currentTrack = null;
 let audios = [];
 let menuAudios = [];
+let muted = false;
 
 // colors
 let teal;
@@ -34,25 +35,30 @@ let blenderSpriteStrip;
 let lidSpriteStrip;
 let buttonSpriteStrip;
 let shakeSpriteStrip;
+let muteSpriteStrip;
+let unmuteSpriteStrip;
 
 const numLetters = 20;
 let letterSpriteStrips = [];
 
-const numMedicins = 3;
-const medicineEnum = { "strip": 0, "bottle": 1, "weed": 2 }
-let medicinSpriteStrips = [];
+// face
+let faceParts = [
+    "head",
+    "angryEyes",
+    "sadEyes",
+    "sadMouth",
+    "happyMouth",
+]
+let faceSpriteStrips = {};
 
-const numFaceParts = 6;
-const facePartEnum = { "zigzag": 0, "sad": 1, "happy": 2, "booger": 3, "high": 4, "dead": 5 }
-let facePartSpriteStrips = [];
-
-const nameLength = 4;
-let medicineNames = [];
 
 // ingredients
 const numIngredients = 6;
-const ingredientsEnum = {"mushroom": 0, "flask": 1, "bone": 2, "berries": 3, "corked": 4, "gunpowder": 5, "locked": 6}
+const ingredientsEnum = {"mushroom": 0, "flask": 1, "bone": 2, "berries": 3, "corked": 4, "gunpowder": 5}
 let ingredientSpriteStrips = [];
+
+const nameLength = 2;
+let ingredientNames = [];
 
 
 // animation stuff
@@ -70,6 +76,7 @@ const gravity = 10;
 
 const personSpacing = 250;
 const walkSpeed = 10;
+const lineLenght = 3;
 
 // state machine functions -----------------------------------------
 let state = new StateMachine({
@@ -81,10 +88,10 @@ let state = new StateMachine({
         { name: 'resumeGame', from: 'paused', to: 'gaming' },
     ],
     methods: {
-        onInit: () => { loadMainMenu(); },
+        onInit: () => { loadMainMenuUI(); },
         onStartNewGame: () => { startNewGame(); },
         onPauseGame: () => { loadPauseUI(); },
-        onExitToMainMenu: () => { loadMainMenu(); },
+        onExitToMainMenu: () => { loadMainMenuUI(); },
         onResumeGame: () => { loadGameUI(); },
     }
 })
