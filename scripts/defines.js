@@ -38,6 +38,12 @@ let shakeSpriteStrip;
 let muteSpriteStrip;
 let unmuteSpriteStrip;
 let explosionSpriteStrip;
+let musicSpriteStrip;
+let musicCreditsSpriteStrip;
+let gameSpriteStrip;
+let extraCreditsSpriteStrip;
+let gameCreditsSpriteStrip;
+let gearSpriteStrip;
 
 const numLetters = 20;
 let letterSpriteStrips = [];
@@ -79,7 +85,9 @@ const personSpacing = 250;
 const walkSpeed = 10;
 const lineLength = 3;
 
-let showNames = true;
+let showNames = false;
+
+let explosionTime = 100;
 
 // state machine functions -----------------------------------------
 let state = new StateMachine({

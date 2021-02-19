@@ -1,13 +1,3 @@
-function loadMainMenuUI() {
-    uiElements = [];
-    uiElements.push(QuickButton(playSpriteStrip, 20, 20, () => { state.startNewGame(); }));
-    if (muted) {
-        uiElements.push(QuickButton(unmuteSpriteStrip, 280, 20, () => { muted = false; reloadUI(); playSound(); }))
-    } else {
-        uiElements.push(QuickButton(muteSpriteStrip, 280, 20, () => { muted = true; reloadUI(); currentTrack.stop(); }))
-    }
-    // playSound();
-}
 
 function startNewGame() {
     // reset game objects
@@ -40,49 +30,52 @@ function startNewGame() {
 
     loadGameUI();
 
-    // playSound();
+}
+
+function loadMainMenuUI() {
+    uiElements = [];
+    // uiElements.push(QuickButton(playSpriteStrip, 20, 20, () => { state.startNewGame(); }));
+    uiElements.push(new Sprite(playSpriteStrip, 20, 20, true, () => { state.startNewGame(); }));
+    // uiElements.push(QuickButton(gearSpriteStrip, 120, 20, () => { state.startNewGame(); state.pauseGame(); }));
+    uiElements.push(new Sprite(gearSpriteStrip, 120, 20, true, () => { state.startNewGame(); state.pauseGame(); }));
 }
 
 function loadGameUI() {
     uiElements = [];
-    uiElements.push(QuickButton(pauseSpriteStrip, 20, 20, () => { state.pauseGame(); }))
-    // if (muted) {
-        // uiElements.push(QuickButton(unmuteSpriteStrip, 150, 20, () => { muted = false; reloadUI(); playSound(); }))
-    // } else {
-        // uiElements.push(QuickButton(muteSpriteStrip, 150, 20, () => { muted = true; reloadUI(); currentTrack.stop(); }))
-    // }
+    // uiElements.push(QuickButton(gearSpriteStrip, 20, 20, () => { state.pauseGame(); }))
+    uiElements.push(new Sprite(gearSpriteStrip, 120, 20, true, () => { state.pauseGame(); }))
 }
 
 
 
 function loadPauseUI() {
     uiElements = [];
-    uiElements.push(QuickButton(playSpriteStrip, 20, 20, () => { state.resumeGame(); }));
-    uiElements.push(QuickButton(crossSpriteStrip, 150, 20, () => { state.exitToMainMenu(); }))
+    uiElements.push(new Sprite(playSpriteStrip, 20, 20, true, () => { state.resumeGame(); }));
+    uiElements.push(new Sprite(crossSpriteStrip, 120, 20, true, () => { state.exitToMainMenu(); }))
     if (muted) {
-        uiElements.push(QuickButton(unmuteSpriteStrip, 280, 20, () => { muted = false; reloadUI(); playSound(); }))
+        uiElements.push(new Sprite(unmuteSpriteStrip, 220, 20, true, () => { muted = false; reloadUI(); playSound(); }))
     } else {
-        uiElements.push(QuickButton(muteSpriteStrip, 280, 20, () => { muted = true; reloadUI(); currentTrack.stop(); }))
+        uiElements.push(new Sprite(muteSpriteStrip, 220, 20, true, () => { muted = true; reloadUI(); currentTrack.stop(); }))
     }
 }
 
 function reloadUI() {
-    if (state.state === "mainMenu") {loadMainMenuUI();}
-    if (state.state === "gaming") {loadGameUI();}
-    if (state.state === "paused") {loadPauseUI();}
+    if (state.state === "mainMenu") { loadMainMenuUI(); }
+    if (state.state === "gaming") { loadGameUI(); }
+    if (state.state === "paused") { loadPauseUI(); }
 }
 
 // init ------------------------------------------------------------
 
 function preload() {
     playSpriteStrip = loadImage('assets/play.png');
-    pauseSpriteStrip = loadImage('assets/pause.png');
+    // pauseSpriteStrip = loadImage('assets/pause.png');
     crossSpriteStrip = loadImage('assets/cross.png');
     cursorSpriteStrip = loadImage('assets/cursor.png');
-    officeSpriteStrip = loadImage('assets/office.ss.png');
-    personSpriteStrip = loadImage('assets/person.ss.png');
+    // officeSpriteStrip = loadImage('assets/office.ss.png');
+    // personSpriteStrip = loadImage('assets/person.ss.png');
     speechSpriteStrip = loadImage('assets/speech.ss.png');
-    skipSpriteStrip = loadImage('assets/skip.ss.png');
+    // skipSpriteStrip = loadImage('assets/skip.ss.png');
     blenderSpriteStrip = loadImage('assets/ingredients/blender.ss.png');
     lidSpriteStrip = loadImage('assets/ingredients/lid.ss.png');
     buttonSpriteStrip = loadImage('assets/ingredients/button.ss.png');
@@ -90,6 +83,13 @@ function preload() {
     muteSpriteStrip = loadImage('assets/mute.ss.png');
     unmuteSpriteStrip = loadImage('assets/unmute.ss.png');
     explosionSpriteStrip = loadImage('assets/explosion.ss.png');
+    stethoscopeSpriteStrip = loadImage('assets/stethoscope.ss.png');
+    musicSpriteStrip = loadImage('assets/music.ss.png');
+    musicCreditsSpriteStrip = loadImage('assets/musicCredits.ss.png');
+    gameSpriteStrip = loadImage('assets/game.ss.png');
+    extraCreditsSpriteStrip = loadImage('assets/extraCredits.ss.png');
+    gameCreditsSpriteStrip = loadImage('assets/gameCredits.ss.png');
+    gearSpriteStrip = loadImage('assets/gear.ss.png');
 
     for (let i = 0; i < numLetters; i++) {
         letterSpriteStrips.push(loadImage('assets/weirdSymbols/' + i + '.ss.png'));
@@ -103,7 +103,7 @@ function preload() {
     faceParts.forEach(name => {
         faceSpriteStrips[name] = loadImage('assets/face/' + name + '.ss.png');
     });
-    
+
     // headSpriteStrip = loadImage('assets/face/head.ss.png');
     // angryEyesSpriteStrip = loadImage('assets/face/angryEyes.ss.png');
     // sadEyesSpriteStrip = loadImage('assets/face/sadEyes.ss.png');
@@ -168,6 +168,15 @@ function draw() {
 
         case 'mainMenu':
             // state.startNewGame();
+            drawFrame(stethoscopeSpriteStrip, 0, 0);
+
+            drawFrame(gameSpriteStrip, 750, 200)
+            drawFrame(gameCreditsSpriteStrip, 800, 200)
+            
+            drawFrame(musicSpriteStrip, 750, 300)
+            drawFrame(musicCreditsSpriteStrip, 800, 300);
+
+            drawFrame(extraCreditsSpriteStrip, 800, 640);
             break;
         case 'paused':
             break;

@@ -14,51 +14,12 @@ function Person(posX, posY) {
     this.posX = posX;
     this.posY = posY;
 
-    // this.removeFacePart = function (a) {
-    // let i = this.face.indexOf(a);
-    // if (i !== -1) { this.face.splice(i, 1); }
-    // }
+    this.explosionTimer = 0;
 }
 
 Person.prototype.update = function () {
 
     if (this.state === "aanDeBeurt") {
-        // let r = personSpriteStrip.width / numFrames / 2;
-        // let cx = this.posX + r;
-        // let cy = this.posY + r;
-
-        // gameObjects.forEach((o, i) => {
-        //     if (o instanceof Shake && !o.onCounter && !o.grabbed) {
-        //         let or = shakeSpriteStrip.width / numFrames / 2;
-        //         let ocx = o.posX + or;
-        //         let ocy = o.posY + or;
-        //         if (sqrt((cx - ocx) ** 2 + (cy - ocy) ** 2) < r + or) {
-        //             // consume
-        //             o.ingredients.forEach(ingredient => {
-        //                 let needIndex = this.needs.indexOf(ingredient.id);
-        //                 if (needIndex !== -1) {
-        //                     this.needs.splice(needIndex, 1);
-        //                 }
-        //                 else if (ingredient.id === ingredientsEnum.gunpowder) {
-        //                     if (this.needs.indexOf(ingredient.id) === -1) {
-        //                         this.explode();
-        //                         this.state = "offScreen";
-
-        //                     }
-        //                 }
-        //             });
-
-        //             // this.isAanDebeurt = false;
-        //             if (!this.isAngry()) {
-        //                 this.makeHappy();
-        //             }
-        //             this.walkAway();
-
-        //             gameObjects.splice(i, 1);
-
-        //         }
-        //     }
-        // });
 
         for (let objIndex = 0; objIndex < gameObjects.length; objIndex++) {
             if (gameObjects[objIndex] instanceof Shake) {
@@ -84,7 +45,7 @@ Person.prototype.update = function () {
                             }
                             this.walkAway();
                         }
-    
+
                         gameObjects.splice(objIndex, 1);
                     }
                 }
@@ -115,9 +76,10 @@ Person.prototype.update = function () {
     }
 
     if (this.state === "exploded") {
-        //explosion code goes here
-        drawFrame(explosionSpriteStrip, this.posX, this.posY);
-        console.log("person exploded!");
+        this.explosionTimer++;
+        if (this.explosionTimer > explosionTime) {
+            this.state = "offScreen";
+        }
     }
 
     if (this.state === "walkBack") {
@@ -131,7 +93,7 @@ Person.prototype.update = function () {
 }
 
 Person.prototype.CanConsume = function (shake) {
-    let r = personSpriteStrip.width / numFrames / 2;
+    let r = faceSpriteStrips.head.width / numFrames / 2;
     let cx = this.posX + r;
     let cy = this.posY + r;
     let or = shakeSpriteStrip.width / numFrames / 2;
@@ -165,21 +127,23 @@ Person.prototype.walkAway = function () {
 
 Person.prototype.show = function () {
 
-    // draw peron
-    // this.face.forEach(name => {
-    drawFrame(faceSpriteStrips["head"], this.posX, this.posY);
-    drawFrame(faceSpriteStrips[this.mouth], this.posX, this.posY);
-    drawFrame(faceSpriteStrips[this.eyes], this.posX, this.posY);
-    // })
+    if (this.state === "exploded") {
+        drawFrame(explosionSpriteStrip, this.posX - 100, this.posY - 100);
+        
+    } else {
+        // draw peron
+        drawFrame(faceSpriteStrips["head"], this.posX, this.posY);
+        drawFrame(faceSpriteStrips[this.mouth], this.posX, this.posY);
+        drawFrame(faceSpriteStrips[this.eyes], this.posX, this.posY);
 
-    // this.attributes.forEach((i) => { drawFrame(facePartSpriteStrips[i], this.posX, this.posY); })
 
-    // draw needs
-    if (this.state === "aanDeBeurt") {
-        drawFrame(speechSpriteStrip, this.posX + 75, this.posY - 50);
-        this.needs.forEach((need, i) => {
-            drawName(need, this.posX + 82 + i * (nameLength + 1) * letterWidth, this.posY - 40);
-        });
+        // draw needs
+        if (this.state === "aanDeBeurt") {
+            drawFrame(speechSpriteStrip, this.posX + 75, this.posY - 50);
+            this.needs.forEach((need, i) => {
+                drawName(need, this.posX + 82 + i * (nameLength + 1) * letterWidth, this.posY - 40);
+            });
 
+        }
     }
 }
